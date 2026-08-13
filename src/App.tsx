@@ -63,11 +63,11 @@ function Link({
 }
 
 function setPageMeta(title: string, description: string) {
-  document.title = `${title} | Aditya Engineering Portfolio`;
+  document.title = `${title} | Aditya Pandey - Engineer`;
   const descriptionTag = document.querySelector('meta[name="description"]');
   descriptionTag?.setAttribute("content", description);
   const ogTitle = document.querySelector('meta[property="og:title"]');
-  ogTitle?.setAttribute("content", `${title} | Aditya Engineering Portfolio`);
+  ogTitle?.setAttribute("content", `${title} | Aditya Pandey - Engineer`);
   const ogDescription = document.querySelector('meta[property="og:description"]');
   ogDescription?.setAttribute("content", description);
 }
