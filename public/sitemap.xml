@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>/</loc></url>
+  <url><loc>/projects</loc></url>
+  <url><loc>/projects/yukti</loc></url>
+  <url><loc>/projects/yukti/storage-engine</loc></url>
+  <url><loc>/projects/yukti/compaction</loc></url>
+  <url><loc>/projects/yukti/segment-directory</loc></url>
+  <url><loc>/projects/airlines-indigo</loc></url>
+  <url><loc>/projects/airlines-indigo/real-time-layer</loc></url>
+  <url><loc>/projects/airlines-indigo/subscription-system</loc></url>
+  <url><loc>/projects/airlines-indigo/docker-infrastructure</loc></url>
+  <url><loc>/pillars/system-design</loc></url>
+  <url><loc>/pillars/low-level-design</loc></url>
+  <url><loc>/pillars/mathematics</loc></url>
+  <url><loc>/pillars/implementation</loc></url>
+  <url><loc>/notes</loc></url>
+  <url><loc>/notes/yukti-ido-spec</loc></url>
+  <url><loc>/notes/airlines-realtime-notes</loc></url>
+  <url><loc>/work/yukti-mvp-architecture</loc></url>
+  <url><loc>/work/yukti-ido-v11</loc></url>
+  <url><loc>/work/yukti-storage-engine-model</loc></url>
+  <url><loc>/work/yukti-segment-directory-v12</loc></url>
+  <url><loc>/work/yukti-compaction</loc></url>
+  <url><loc>/work/yukti-garbage-collection</loc></url>
+  <url><loc>/work/yukti-upe-bil</loc></url>
+  <url><loc>/work/airlines-status-event-flow</loc></url>
+  <url><loc>/work/airlines-architecture</loc></url>
+  <url><loc>/work/airlines-rest-api</loc></url>
+  <url><loc>/work/airlines-realtime-layer</loc></url>
+  <url><loc>/work/airlines-subscription-system</loc></url>
+  <url><loc>/work/airlines-notification-pipeline</loc></url>
+  <url><loc>/work/airlines-data-model</loc></url>
+  <url><loc>/work/airlines-docker-compose</loc></url>
+  <url><loc>/about</loc></url>
+</urlset>

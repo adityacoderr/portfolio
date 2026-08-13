@@ -1,0 +1,333 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: #f7f4ee;
+    color: #1d1c19;
+  }
+
+  ::selection {
+    background: rgba(138, 75, 51, 0.22);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d8d0c3;
+    border: 3px solid #f7f4ee;
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #8a4b33;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:bg-ink focus:px-4 focus:py-2 focus:text-sm focus:text-paper;
+  }
+
+  .nav-link {
+    @apply relative rounded-sm px-3 py-2 text-sm text-muted transition hover:text-ink focus:outline-none focus:ring-2 focus:ring-graph/40;
+  }
+
+  .nav-link-active {
+    @apply text-ink;
+  }
+
+  .nav-link-active::after {
+    @apply absolute inset-x-3 -bottom-0.5 h-0.5 content-[''] bg-rust;
+  }
+
+  .mobile-nav {
+    @apply whitespace-nowrap border border-line bg-panel px-3 py-2 text-sm text-muted transition hover:text-ink;
+  }
+
+  .mobile-nav-active {
+    @apply border-ink text-ink;
+  }
+
+  .button-primary {
+    @apply inline-flex min-h-10 items-center justify-center rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:-translate-y-0.5 hover:bg-steel hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/40;
+  }
+
+  .button-secondary {
+    @apply inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-panel px-4 py-2 text-sm font-medium text-ink transition hover:-translate-y-0.5 hover:border-ink hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/40;
+  }
+
+  .hero {
+    @apply bg-paper;
+  }
+
+  .hero h1,
+  .page-title {
+    @apply max-w-4xl text-5xl font-bold leading-[1.02] tracking-tight text-ink md:text-7xl;
+  }
+
+  .section {
+    @apply mx-auto max-w-7xl px-5 py-14 md:py-20;
+  }
+
+  .section-heading {
+    @apply mx-auto mb-9 max-w-3xl;
+  }
+
+  .section-heading h2 {
+    @apply text-3xl font-semibold leading-tight tracking-tight text-ink md:text-4xl;
+  }
+
+  .section-heading p:not(.eyebrow) {
+    @apply mt-4 max-w-2xl text-base leading-7 text-muted;
+  }
+
+  .section-label {
+    @apply flex-none font-mono text-xs uppercase tracking-[0.16em] text-rust;
+  }
+
+  .section-rule {
+    @apply h-px flex-1 bg-line;
+  }
+
+  .eyebrow {
+    @apply mb-4 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-rust;
+  }
+
+  .eyebrow::before {
+    @apply h-1.5 w-1.5 flex-none content-[''] bg-rust;
+  }
+
+  .panel {
+    @apply rounded-md border border-line bg-panel p-5 md:p-6;
+  }
+
+  .item-card,
+  .pillar-panel {
+    @apply rounded-md border border-line bg-panel p-5 transition duration-200 hover:-translate-y-0.5 hover:border-muted hover:shadow-soft md:p-6;
+  }
+
+  .item-card h3,
+  .pillar-panel h3 {
+    @apply mt-3 text-xl font-semibold leading-snug text-ink;
+  }
+
+  .item-card h3 a,
+  .pillar-panel h3 a {
+    @apply transition hover:text-graph;
+  }
+
+  .item-card p:not(:first-child),
+  .pillar-panel p:not(:first-child) {
+    @apply mt-3 text-sm leading-6 text-muted;
+  }
+
+  .tag {
+    @apply inline-flex min-h-8 items-center border border-line bg-paper px-2.5 py-1 font-mono text-xs text-muted transition hover:border-ink hover:text-ink;
+  }
+
+  .chip {
+    @apply inline-flex min-h-8 items-center border border-line bg-paper px-3 py-1 font-mono text-xs text-muted;
+  }
+
+  .diagram {
+    @apply border border-line bg-panel p-5 shadow-soft;
+  }
+
+  .diagram-row {
+    @apply grid grid-cols-[3rem_1fr_4rem] items-center gap-3 border-b border-line py-3 last:border-b-0;
+  }
+
+  .diagram-index {
+    @apply font-mono text-xs text-muted;
+  }
+
+  .diagram-node {
+    @apply font-mono text-sm text-ink;
+  }
+
+  .diagram-arrow {
+    @apply text-right font-mono text-[10px] uppercase text-rust;
+  }
+
+  .details-list {
+    @apply space-y-5;
+  }
+
+  .details-list dt {
+    @apply font-mono text-xs uppercase tracking-[0.14em] text-muted;
+  }
+
+  .details-list dd {
+    @apply mt-2 text-sm leading-6 text-ink;
+  }
+
+  .content-heading {
+    @apply flex items-center gap-2.5 text-xl font-semibold text-ink;
+  }
+
+  .content-heading::before {
+    @apply h-3.5 w-1 flex-none content-[''] rounded-sm bg-rust;
+  }
+
+  .breadcrumb {
+    @apply flex flex-wrap gap-2 font-mono text-xs text-muted;
+  }
+
+  .breadcrumb a {
+    @apply transition hover:text-ink;
+  }
+
+  .technical-page {
+    @apply mt-8 divide-y divide-line border-y border-line;
+  }
+
+  .technical-page section {
+    @apply grid gap-4 py-6 md:grid-cols-[12rem_1fr];
+  }
+
+  .technical-page h2 {
+    @apply font-mono text-sm font-semibold uppercase text-ink;
+  }
+
+  .technical-page p {
+    @apply max-w-3xl text-base leading-8 text-muted;
+  }
+
+  .content-blocks {
+    @apply flex max-w-3xl flex-col gap-4;
+  }
+
+  .content-blocks p {
+    @apply max-w-3xl text-base leading-8 text-muted;
+  }
+
+  .content-list {
+    @apply max-w-3xl list-none space-y-2;
+  }
+
+  .content-list li {
+    @apply flex gap-3 text-base leading-7 text-muted;
+  }
+
+  .content-list li::before {
+    @apply mt-[0.65em] h-1.5 w-1.5 flex-none content-[''] bg-rust;
+  }
+
+  .code-block-wrap {
+    @apply max-w-3xl;
+  }
+
+  .code-label {
+    @apply mb-2 font-mono text-xs uppercase text-rust;
+  }
+
+  .code-block {
+    @apply overflow-x-auto rounded-md bg-[#141310] p-4 font-mono text-[13px] leading-relaxed text-[#e8e2d6] md:p-5;
+  }
+
+  .code-block code {
+    @apply whitespace-pre;
+  }
+
+  .math-block {
+    @apply max-w-3xl overflow-x-auto rounded-md border border-line bg-panel p-4 text-center font-mono text-sm text-ink;
+  }
+
+  .callout {
+    @apply max-w-3xl rounded-r-md border-l-2 border-rust bg-panel p-4 text-sm leading-6 text-muted;
+  }
+
+  .callout-info {
+    @apply border-graph;
+  }
+
+  .flow {
+    @apply flex max-w-3xl flex-wrap items-center gap-2;
+  }
+
+  .flow-step {
+    @apply flex items-center gap-2;
+  }
+
+  .flow-node {
+    @apply border border-line bg-panel px-3 py-2 font-mono text-xs text-ink;
+  }
+
+  .flow-arrow {
+    @apply font-mono text-xs text-rust;
+  }
+
+  .featured-panel {
+    @apply relative flex flex-col overflow-hidden rounded-md border border-ink bg-panel p-5 shadow-[0_2px_10px_rgba(29,28,25,0.06)] md:p-8;
+  }
+
+  .featured-panel::before {
+    @apply absolute inset-x-0 top-0 h-1 content-[''] bg-gradient-to-r from-rust via-moss to-graph;
+  }
+
+  .featured-panel h3 {
+    @apply mt-3 text-2xl font-semibold leading-snug text-ink;
+  }
+
+  .featured-panel h3 a {
+    @apply transition hover:text-graph;
+  }
+
+  .featured-panel .featured-tagline {
+    @apply mt-1 font-mono text-sm text-rust;
+  }
+
+  .featured-panel p:not(.featured-tagline):not(:first-child) {
+    @apply mt-3 text-base leading-7 text-muted;
+  }
+
+  .empty-state {
+    @apply mt-4 border border-dashed border-line bg-panel p-5 text-sm leading-6 text-muted;
+  }
+
+  .about-statement {
+    @apply max-w-3xl border-l-2 border-rust bg-panel p-6 md:p-8;
+  }
+
+  .about-statement p {
+    @apply text-2xl font-medium leading-snug text-ink;
+  }
+}
