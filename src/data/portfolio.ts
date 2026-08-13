@@ -1536,7 +1536,7 @@ export const stackGroups = [
   },
   {
     label: "Databases",
-    items: ["MongoDB"]
+    items: ["MongoDB", "SQL", "Cassandra", "RocksDB", "DynamoDB", "Amazon Aurora"]
   },
   {
     label: "Infrastructure",
