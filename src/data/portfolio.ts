@@ -1548,7 +1548,7 @@ export const stackGroups = [
   },
   {
     label: "Tools",
-    items: ["Git", "GitHub"]
+    items: ["Git", "GitHub", "kind", "kubectl", "Linux"]
   }
 ];
 
