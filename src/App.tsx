@@ -397,7 +397,7 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 function HomePage() {
   useEffect(() => {
     setPageMeta(
-      "I design and build systems",
+      "Homepage",
       "An engineering portfolio organized around system design, low-level design, mathematics, implementation, and technical trade-offs."
     );
   }, []);
