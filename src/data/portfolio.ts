@@ -74,7 +74,7 @@ const yuktiSubsystems: Subsystem[] = [
     id: "ido",
     title: "IDO",
     description:
-      "The Intelligent Data Object is Yukti's data-object abstraction, with a frozen v1.1 binary specification."
+      "The Intelligent Data Object is Yukti's data-object abstraction, carrying data together with the metadata the data-management model needs."
   },
   {
     id: "storage-engine",
@@ -85,7 +85,7 @@ const yuktiSubsystems: Subsystem[] = [
       {
         id: "segment-directory",
         title: "Segment Directory",
-        description: "Engine-wide metadata index of all segments. Frozen architecture (v1.2)."
+        description: "Engine-wide metadata index of all segments."
       },
       {
         id: "segment-format",
@@ -324,106 +324,6 @@ export const technicalWorks: TechnicalWork[] = [
     relatedNoteIds: []
   },
   {
-    id: "yukti-ido-v11",
-    title: "IDO v1.1: Frozen Binary Specification",
-    projectId: "yukti",
-    subsystemId: "ido",
-    pillars: ["system-design", "low-level-design"],
-    type: "specification",
-    tags: ["binary-format", "metadata", "specification"],
-    summary:
-      "The Intelligent Data Object carries data together with the metadata Yukti's data-management model needs. Its v1.1 binary layout is a frozen specification centered on a 128-byte header boundary.",
-    sections: [
-      {
-        label: "Problem",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "IDO is Yukti's data-object abstraction and has a defined binary specification. It is not simply a normal database row: it carries data together with metadata needed by Yukti's data-management model."
-          }
-        ]
-      },
-      {
-        label: "Metadata model",
-        blocks: [
-          {
-            kind: "list",
-            items: [
-              "Object identity",
-              "Collection / tenant identity",
-              "Version",
-              "Timestamps",
-              "TTL",
-              "Lifecycle",
-              "Consistency",
-              "Durability",
-              "Priority",
-              "Security",
-              "Access semantics",
-              "Payload type / format / properties"
-            ]
-          }
-        ]
-      },
-      {
-        label: "Binary layout",
-        blocks: [
-          {
-            kind: "code",
-            label: "IDO v1.1 header (frozen)",
-            language: "text",
-            code: "Magic                  4 B    IDO1\nSchemaVersion          2 B\nHeaderFlags            4 B\nTotalObjectLength      8 B    uint64\nHeaderLength           2 B\nHeaderChecksum         8 B    XXHash64\nObjectID              24 B    recommended\nCollectionID           4 B\nTenantID               8 B\nObjectVersion          4 B\nCreatedAt              8 B\nLogicalTimestamp      12 B\nTTL                    4 B\nLifecycleFlags         4 B\nConsistencyClass       defined\nDurabilityClass        defined\nBusinessPriority       defined\nSecurityLabelID        defined\nAccessSemantics        defined"
-          }
-        ]
-      },
-      {
-        label: "Layout decisions",
-        blocks: [
-          {
-            kind: "list",
-            items: [
-              "The header is designed around a 128-byte header boundary in the frozen full-object format; the payload begins at the 128-byte boundary.",
-              "The footer is 8-byte aligned.",
-              "The frozen specification uses IDO1 as the magic, a uint64 total object length, and XXHash64 for the header checksum.",
-              "A 24-byte recommended ObjectID and a 12-byte logical/hybrid timestamp are used."
-            ]
-          }
-        ]
-      },
-      {
-        label: "Payload section",
-        blocks: [
-          {
-            kind: "code",
-            label: "Payload fields",
-            language: "text",
-            code: "PayloadType\nPayloadFormat\nPayloadProperties\nPayloadLength\nPayload"
-          }
-        ]
-      },
-      {
-        label: "Small-object modes",
-        blocks: [
-          {
-            kind: "callout",
-            variant: "info",
-            text: "Two size-oriented modes were discussed: a minimal IDO mode for objects approximately below 512 bytes (compact header around 48–64 bytes), and packed paged small objects for payloads approximately below 64 bytes. These are optimization concepts and are not the same thing as the frozen full IDO v1.1 layout unless explicitly specified."
-          }
-        ]
-      },
-      {
-        label: "Status",
-        blocks: [
-          {
-            kind: "callout",
-            text: "Status: Frozen specification."
-          }
-        ]
-      }
-    ],
-    relatedNoteIds: ["yukti-ido-spec"]
-  },
-  {
     id: "yukti-storage-engine-model",
     title: "Storage Engine: Model and Design Sequence",
     projectId: "yukti",
@@ -494,7 +394,7 @@ export const technicalWorks: TechnicalWork[] = [
   },
   {
     id: "yukti-segment-directory-v12",
-    title: "Segment Directory v1.2: Derived-Index Architecture",
+    title: "Segment Directory: Derived-Index Architecture",
     projectId: "yukti",
     subsystemId: "segment-directory",
     pillars: ["system-design", "low-level-design"],
@@ -561,7 +461,7 @@ export const technicalWorks: TechnicalWork[] = [
         blocks: [
           {
             kind: "callout",
-            text: "Status: Frozen architecture (v1.2)."
+            text: "Status: Architecture locked; design record current."
           }
         ]
       }
@@ -608,20 +508,7 @@ export const technicalWorks: TechnicalWork[] = [
         blocks: [
           {
             kind: "paragraph",
-            text: "A major conceptual direction is a Segment Cleaner. It should not blindly compact everything: the design explores evaluating segment health and selecting work based on measurable characteristics. One candidate concept is a Segment Health Score."
-          },
-          {
-            kind: "list",
-            items: [
-              "Obsolete / dead data ratio",
-              "Live-data density",
-              "Version density",
-              "Tombstone density",
-              "Fragmentation",
-              "Read relevance",
-              "Reclaimable space",
-              "Age"
-            ]
+            text: "A major conceptual direction is a Segment Cleaner: rather than blindly compacting everything, the design explores evaluating segment health and selecting work based on measurable characteristics."
           }
         ]
       },
@@ -631,7 +518,7 @@ export const technicalWorks: TechnicalWork[] = [
           {
             kind: "callout",
             variant: "warning",
-            text: "The exact final Segment Health Score formula is not frozen yet; the scoring model is still a design discussion area. Do not claim measured compaction performance unless actual benchmark data exists."
+            text: "The selection and scoring model is still a design discussion area. Do not claim measured compaction performance unless actual benchmark data exists."
           }
         ]
       }
@@ -1333,54 +1220,6 @@ export const technicalWorks: TechnicalWork[] = [
 ];
 
 export const notes: EngineeringNote[] = [
-  {
-    id: "yukti-ido-spec",
-    title: "IDO v1.1 Binary Specification",
-    description:
-      "A working summary of the frozen IDO v1.1 layout: header fields, the 128-byte payload boundary, checksum choice, and alignment rules.",
-    category: "File Formats",
-    tags: ["ido", "binary-format", "checksum", "alignment"],
-    relatedProjectId: "yukti",
-    relatedSubsystemId: "ido",
-    pillarIds: ["system-design", "low-level-design"],
-    status: "published",
-    content: [
-      {
-        label: "Scope",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "This note is a working summary of the frozen IDO v1.1 specification as maintained in the project reference material. IDO is Yukti's data-object abstraction, not a normal database row: it carries data together with the metadata the data-management model needs."
-          }
-        ]
-      },
-      {
-        label: "Header layout",
-        blocks: [
-          {
-            kind: "code",
-            label: "Frozen header fields",
-            language: "text",
-            code: "Magic                  4 B    IDO1\nSchemaVersion          2 B\nHeaderFlags            4 B\nTotalObjectLength      8 B    uint64\nHeaderLength           2 B\nHeaderChecksum         8 B    XXHash64\nObjectID              24 B    recommended\nCollectionID           4 B\nTenantID               8 B\nObjectVersion          4 B\nCreatedAt              8 B\nLogicalTimestamp      12 B\nTTL                    4 B\nLifecycleFlags         4 B\nConsistencyClass       defined\nDurabilityClass        defined\nBusinessPriority       defined\nSecurityLabelID        defined\nAccessSemantics        defined"
-          }
-        ]
-      },
-      {
-        label: "Layout decisions",
-        blocks: [
-          {
-            kind: "list",
-            items: [
-              "The header is designed around a 128-byte header boundary in the frozen full-object format; the payload begins at the 128-byte boundary.",
-              "The footer is 8-byte aligned.",
-              "IDO1 is the magic; total object length is a uint64; the header checksum is XXHash64.",
-              "The recommended ObjectID is 24 bytes; the logical/hybrid timestamp is 12 bytes."
-            ]
-          }
-        ]
-      }
-    ]
-  },
   {
     id: "storage-engine-note-template",
     title: "Storage Engine Design Note",
