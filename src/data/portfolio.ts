@@ -1119,6 +1119,202 @@ export const notes: EngineeringNote[] = [
         ]
       }
     ]
+  },
+  {
+    id: "gcb-ball-event-model-note",
+    title: "GCB: Ball-Level Event Model",
+    description:
+      "Why GCB persists each delivery as a discrete event and derives innings state instead of mutating a single score aggregate.",
+    category: "Real-Time Systems",
+    tags: ["gcb", "cricket", "event-model", "state-derivation"],
+    relatedProjectId: "gcb",
+    relatedSubsystemId: "ball-by-ball-scoring",
+    pillarIds: ["system-design", "low-level-design", "implementation"],
+    status: "published",
+    content: [
+      {
+        label: "Context",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "A cricket score is not a single number. One delivery can change runs, extras, wickets, legal-ball count, over number, striker/non-striker, bowler, and innings state at once. Storing only a mutable total makes history and correctness hard to recover."
+          }
+        ]
+      },
+      {
+        label: "Approach",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "GCB persists each ball as a discrete event with batter, bowler, runs, extras, wicket/dismissal, legal-ball flag, and over/innings context. Innings totals, over history, and scorecards are derived from the ordered event log rather than being the source of truth."
+          },
+          {
+            kind: "list",
+            items: [
+              "Append-only ball log in MongoDB (Mongoose) keyed by match and innings",
+              "Derivation for score, wickets, legal balls, and over state on each write",
+              "Enables reconstruction of match state at any point and deterministic over/inning transitions"
+            ]
+          }
+        ]
+      },
+      {
+        label: "Trade-off",
+        blocks: [
+          {
+            kind: "callout",
+            variant: "info",
+            text: "Deriving state costs a read of recent events but avoids divergence between score, balls, and player state. History (over history, scorecard) stays consistent by construction."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "gcb-realtime-room-sync-note",
+    title: "GCB: Socket.IO Match Rooms",
+    description:
+      "How GCB keeps scorer and viewers in sync with match-specific Socket.IO rooms and an authoritative backend.",
+    category: "Real-Time Systems",
+    tags: ["gcb", "socket-io", "realtime", "rooms"],
+    relatedProjectId: "gcb",
+    relatedSubsystemId: "realtime-engine",
+    pillarIds: ["system-design", "implementation"],
+    status: "published",
+    content: [
+      {
+        label: "Context",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "Live scoring needs low-latency fan-out without polling. Broadcasting every match update to every client does not scale and leaks match isolation."
+          }
+        ]
+      },
+      {
+        label: "Design",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "Backend is source of truth. Clients join match:<matchId> rooms. On a scoring action the server validates, persists to MongoDB, mutates authoritative state, then emits to that room only."
+          },
+          {
+            kind: "flow",
+            steps: ["Scorer action", "Validate + persist", "Emit to match room", "Viewers update via Zustand"]
+          }
+        ]
+      },
+      {
+        label: "Why rooms",
+        blocks: [
+          {
+            kind: "list",
+            items: [
+              "Natural isolation: Match A updates never reach Match B clients",
+              "No polling; server push via Socket.IO keeps scorer and viewers consistent",
+              "Easy to reason about: one room = one match broadcast domain"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "gcb-innings-state-machine-note",
+    title: "GCB: Innings State Machine",
+    description:
+      "Encoding cricket rules — legal balls, overs, striker changes, and result — as an explicit backend state machine.",
+    category: "Real-Time Systems",
+    tags: ["gcb", "state-machine", "cricket-rules", "innings"],
+    relatedProjectId: "gcb",
+    relatedSubsystemId: "ball-by-ball-scoring",
+    pillarIds: ["low-level-design", "implementation"],
+    status: "published",
+    content: [
+      {
+        label: "Problem",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "One delivery can trigger wides/no-balls (not a legal ball), free-hit, odd-run striker swap, wicket, end-of-over bowler change, and even innings/match completion. Treating these as ad-hoc if-branches invites bugs."
+          }
+        ]
+      },
+      {
+        label: "State machine",
+        blocks: [
+          {
+            kind: "code",
+            label: "Innings lifecycle",
+            language: "text",
+            code: "MATCH_CREATED -> SETUP -> INNINGS_1 -> INNINGS_1_COMPLETE -> INNINGS_2 -> MATCH_COMPLETE\n                                |-> TARGET_REACHED | OVERS_EXHAUSTED | ALL_OUT"
+          },
+          {
+            kind: "list",
+            items: [
+              "Legal-ball determination: wides/no-balls do not advance ball count; no-ball sets free-hit for next ball",
+              "Striker swap on odd runs, wicket fall, and over boundary",
+              "Over completion triggers bowler rotation; innings completion triggers target/result calculation"
+            ]
+          }
+        ]
+      },
+      {
+        label: "Result",
+        blocks: [
+          {
+            kind: "callout",
+            text: "Backend owns the transition; frontend renders derived state. Scorecards, over history, and the AI summary all read from the same deterministic state."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    id: "gcb-scorer-workflow-note",
+    title: "GCB: Scorer Workflow and Client State",
+    description:
+      "Splitting the live match UI into write-oriented scoring controls and read-oriented scorecards, coordinated through Zustand.",
+    category: "Full-Stack Systems",
+    tags: ["gcb", "ui", "zustand", "react"],
+    relatedProjectId: "gcb",
+    relatedSubsystemId: "live-match-interface",
+    pillarIds: ["low-level-design", "implementation"],
+    status: "published",
+    content: [
+      {
+        label: "Context",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "The scorer needs fast ball entry while retaining context: active batters, bowler, score, overs, and recent balls. A monolithic component makes that workflow slow and error-prone."
+          }
+        ]
+      },
+      {
+        label: "Decomposition",
+        blocks: [
+          {
+            kind: "list",
+            items: [
+              "BallControls: primary scoring input; SelectBowler/NewBatsman modals for transitions",
+              "OverEntry / OverHistory and ScoreHeader / BatterCard for live context",
+              "FullScorecard and MatchResult for read-oriented presentation",
+              "matchStore (Zustand) as single client-side source; Socket.IO mutations update the store reactively"
+            ]
+          }
+        ]
+      },
+      {
+        label: "Why it helps",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "Write-oriented controls stay focused while read-oriented views remain consistent because every component reads the same store. No component maintains a divergent copy of match state."
+          }
+        ]
+      }
+    ]
   }
 ];
 
@@ -1168,3 +1364,75 @@ export const contact = {
   github: "https://github.com/adityacoderr",
   linkedin: "https://www.linkedin.com/in/aditya-pandey-037872262"
 };
+
+export interface JourneyEntry {
+  period: string;
+  title: string;
+  organization: string;
+  description: string;
+}
+
+export const journey: JourneyEntry[] = [
+  {
+    period: "2021–2022",
+    title: "Founder / Technical Lead",
+    organization: "ONISORIGINALS",
+    description:
+      "Led technical architecture and development of e-commerce and internal software systems. Built web applications, backend APIs, automation workflows, and operational dashboards. Managed engineering decisions across product development, deployment, and technical operations."
+  },
+  {
+    period: "2023–2027",
+    title: "B.Tech — Computer Science Engineering",
+    organization: "Uttarakhand Technical University",
+    description:
+      "Formal computer science education alongside increasingly systems-oriented engineering work. Developed deeper expertise in systems, backend engineering, distributed architectures, Linux, networking, infrastructure, and storage systems."
+  },
+  {
+    period: "Current Focus",
+    title: "Systems · Backend · Infrastructure",
+    organization: "Engineering Direction",
+    description:
+      "Developing deeper expertise in systems, backend engineering, distributed architectures, Linux, networking, infrastructure, and storage systems. Current engineering focus on distributed data systems and real-time backend architectures."
+  },
+  {
+    period: "Representative Systems Work",
+    title: "Yukti + AIRLINES-INDIGO",
+    organization: "Distributed & Real-Time Systems",
+    description:
+      "Building distributed storage architecture (Yukti: custom storage engine, immutable segments, IDO binary format, segment directory, compaction, garbage collection) and real-time backend systems (AIRLINES-INDIGO: containerized full-stack flight-status system with REST APIs, MongoDB persistence, Socket.IO real-time updates, Docker)."
+  }
+];
+
+export interface Achievement {
+  title: string;
+  subtitle?: string;
+  category: "Achievement" | "Certification";
+  emphasis?: boolean;
+  description: string;
+}
+
+export const achievements: Achievement[] = [
+  {
+    title: "2× National Hackathon Winner",
+    category: "Achievement",
+    emphasis: true,
+    description: "Winner at two national-level hackathons."
+  },
+  {
+    title: "AWS Cloud Practitioner",
+    subtitle: "ICT Academy",
+    category: "Certification",
+    description: "AWS cloud fundamentals certification through ICT Academy."
+  },
+  {
+    title: "NPTEL Certification",
+    subtitle: "Programming in Java",
+    category: "Certification",
+    description: "NPTEL certification in Programming in Java."
+  },
+  {
+    title: "ISRO Hackathon Participant",
+    category: "Achievement",
+    description: "Participated in an ISRO hackathon."
+  }
+];

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks } from "./data/portfolio";
+import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks, journey, achievements, type JourneyEntry, type Achievement } from "./data/portfolio";
 import type {
   ContentBlock,
   EngineeringNote,
@@ -199,6 +199,131 @@ function Footer() {
   );
 }
 
+function JourneyTimeline() {
+  return (
+    <Section eyebrow="01 / Journey" title="Engineering Journey">
+      <div className="relative mt-8" role="list" aria-label="Engineering journey timeline">
+        {/* Desktop / Tablet vertical timeline line */}
+        <div className="absolute left-[19px] md:left-[23px] top-4 bottom-4 w-px bg-gradient-to-b from-rust via-line to-line hidden sm:block" aria-hidden="true" />
+        
+        <div className="space-y-6 sm:space-y-8">
+          {journey.map((entry, index) => (
+            <JourneyEntryCard key={entry.period} entry={entry} index={index} total={journey.length} />
+          ))}
+          <JourneyEndCard />
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function JourneyEntryCard({
+  entry,
+  index,
+  total
+}: {
+  entry: JourneyEntry;
+  index: number;
+  total: number;
+}) {
+  return (
+    <article className="relative sm:pl-12 md:pl-16 group" role="listitem">
+      {/* Timeline Node marker */}
+      <div className="hidden sm:flex absolute left-[11px] md:left-[15px] top-6 w-4 h-4 rounded-full bg-paper border-2 border-rust items-center justify-center transition-transform duration-300 group-hover:scale-125 group-hover:bg-rust shadow-sm" aria-hidden="true">
+        <div className="w-1.5 h-1.5 rounded-full bg-rust transition-colors group-hover:bg-paper" />
+      </div>
+
+      <div className="panel transition-all duration-300 hover:border-rust/50 hover:shadow-soft bg-panel relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rust/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs uppercase tracking-[0.16em] px-2.5 py-1 rounded-sm bg-paper border border-line text-rust font-semibold">
+              {entry.period}
+            </span>
+            <span className="font-mono text-xs text-muted hidden md:inline">
+              // phase_0{index + 1}
+            </span>
+          </div>
+          <span className="text-sm font-medium text-muted flex items-center gap-1.5">
+            <svg className="w-4 h-4 text-rust shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg>
+            {entry.organization}
+          </span>
+        </div>
+
+        <h3 className="text-xl font-semibold tracking-tight text-ink group-hover:text-rust transition-colors">
+          {entry.title}
+        </h3>
+
+        <p className="mt-3 text-sm leading-7 text-muted">
+          {entry.description}
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function JourneyEndCard() {
+  return (
+    <article className="relative sm:pl-12 md:pl-16 group opacity-75 hover:opacity-100 transition-opacity" role="listitem" aria-label="Continued journey">
+      <div className="hidden sm:flex absolute left-[11px] md:left-[15px] top-6 w-4 h-4 rounded-full bg-paper border-2 border-dashed border-line items-center justify-center" aria-hidden="true">
+        <div className="w-1.5 h-1.5 rounded-full bg-line" />
+      </div>
+
+      <div className="panel border-dashed border-line bg-panel/50 relative">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="font-mono text-xs uppercase tracking-[0.16em] px-2.5 py-1 rounded-sm bg-paper border border-line text-muted">
+            Ongoing
+          </span>
+        </div>
+
+        <h3 className="text-xl font-semibold tracking-tight text-ink">
+          More to come
+        </h3>
+
+        <p className="mt-3 text-sm leading-7 text-muted">
+          The engineering journey continues with new challenges, deeper systems, and harder problems.
+        </p>
+      </div>
+    </article>
+  );
+}
+
+function AchievementsSection() {
+  return (
+    <Section eyebrow="02 / Achievements" title="Achievements & Certifications">
+      <div className="space-y-6">
+        {achievements.map((achievement, index) => (
+          <AchievementCard key={achievement.title} achievement={achievement} index={index} />
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function AchievementCard({
+  achievement,
+  index
+}: {
+  achievement: Achievement;
+  index: number;
+}) {
+  return (
+    <article className="relative panel" role="listitem">
+      <h3 className="font-semibold leading-snug text-lg text-ink">
+        {achievement.title}
+      </h3>
+      {achievement.subtitle && (
+        <p className="mt-1 text-sm text-muted">{achievement.subtitle}</p>
+      )}
+      <p className="mt-2 text-sm leading-6 text-muted">{achievement.description}</p>
+      <span className="mt-3 inline-block tag">{achievement.category}</span>
+    </article>
+  );
+}
+
 function Section({
   eyebrow,
   title,
@@ -394,6 +519,34 @@ function NoteCard({ note }: { note: EngineeringNote }) {
   );
 }
 
+function HeroSection() {
+  return (
+    <section className="hero">
+      <div className="mx-auto max-w-7xl px-5 py-16 md:py-28">
+        <p className="font-mono text-sm uppercase tracking-[0.16em] text-rust">
+          {profile.name} · {profile.course} · {profile.location}
+        </p>
+        <h1 className="mt-6">
+          I design and build <span className="text-rust">systems</span>.
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
+          A technical notebook for the work I have built and the decisions behind it. Focused on systems, backend, and
+          infrastructure — storage engines, real-time backends, and low-level design, with trade-offs made explicit.
+        </p>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link href="/projects" className="button-primary">
+            Explore projects
+          </Link>
+          <a href="/resume.pdf" download className="button-secondary">
+            Download Resume
+          </a>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomePage() {
   useEffect(() => {
     setPageMeta(
@@ -415,44 +568,11 @@ function HomePage() {
 
   return (
     <>
-      <section className="hero">
-        <div className="mx-auto max-w-7xl px-5 py-16 md:py-28">
-          <p className="font-mono text-sm uppercase tracking-[0.16em] text-rust">
-            {profile.name} · {profile.course} · {profile.location}
-          </p>
-          <h1 className="mt-6">
-            I design and build <span className="text-rust">systems</span>.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-muted">
-            A technical notebook for the work I have built and the decisions behind it.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/projects" className="button-primary">
-              Explore projects
-            </Link>
-            <Link href="/pillars/system-design" className="button-secondary">
-              Engineering pillars
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
-      <Section
-        eyebrow="01 / Pillars"
-        title="Engineering perspective"
-      >
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {pillars.map((pillar) => (
-            <article key={pillar.id} className="pillar-panel">
-              <p className="font-mono text-xs uppercase text-muted">{pillar.shortTitle}</p>
-              <h3>
-                <Link href={`/pillars/${pillar.id}`}>{pillar.title}</Link>
-              </h3>
-              <p>{pillar.description}</p>
-            </article>
-          ))}
-        </div>
-      </Section>
+      <JourneyTimeline />
+
+      <AchievementsSection />
 
       <Section eyebrow="02 / Projects" title="Featured projects">
         {featured.length > 0 && (
@@ -472,11 +592,19 @@ function HomePage() {
       </Section>
 
       <Section eyebrow="03 / Selected work" title="Selected work">
-        <WorkCards items={selectedWorks} emptyText="No technical work has been published yet." />
+        <WorkCards items={selectedWorks} initial={2} emptyText="No technical work has been published yet." />
       </Section>
 
       <Section eyebrow="04 / Notes" title="Notes">
-        <NoteList notesToShow={notes.slice(0, 4)} />
+        <NoteList
+          notesToShow={[...notes]
+            .sort(
+              (a, b) =>
+                ({ published: 0, draft: 1, planned: 2 }[a.status] -
+                  { published: 0, draft: 1, planned: 2 }[b.status])
+            )
+            .slice(0, 4)}
+        />
       </Section>
 
       <ContactBand />
