@@ -68,24 +68,18 @@ const yuktiSubsystems: Subsystem[] = [
     id: "architecture",
     title: "Architecture",
     description:
-      "Project-level component boundaries. The agreed MVP is a minimal distributed system: IDO, UPE, BIL, Discovery, and the Storage Engine. HBF, replication, and consensus are deferred."
-  },
-  {
-    id: "ido",
-    title: "IDO",
-    description:
-      "The Intelligent Data Object is Yukti's data-object abstraction, carrying data together with the metadata the data-management model needs."
+      "Minimal distributed system: IDO, UPE, BIL, Discovery, and Storage Engine. Advanced capabilities (HBF, replication, consensus) deferred."
   },
   {
     id: "storage-engine",
     title: "Storage Engine",
     description:
-      "The persistence subsystem underneath the broader system, built around Yukti's own object/segment/page model and immutable segments.",
+      "Persistence subsystem built around Yukti's own object/segment/page model with immutable segments.",
     children: [
       {
         id: "segment-directory",
         title: "Segment Directory",
-        description: "Engine-wide metadata index of all segments."
+        description: "Engine-wide metadata index of all segments; derived-index architecture."
       },
       {
         id: "segment-format",
@@ -98,11 +92,6 @@ const yuktiSubsystems: Subsystem[] = [
         description: "Layout of pages within segments."
       },
       {
-        id: "object-directory",
-        title: "Object Directory",
-        description: "Locating objects within segments."
-      },
-      {
         id: "write-path",
         title: "Write Path",
         description: "Flow from accepted write to durable representation."
@@ -113,44 +102,49 @@ const yuktiSubsystems: Subsystem[] = [
         description: "Flow from lookup request to returned versioned data."
       },
       {
-        id: "versioning",
-        title: "Versioning",
-        description: "Rules for version identity, visibility, and retention."
-      },
-      {
         id: "compaction",
         title: "Compaction",
-        description: "Reorganization of stored segments and obsolete records."
-      },
-      {
-        id: "garbage-collection",
-        title: "Garbage Collection",
-        description: "Safe reclamation of storage no longer needed."
+        description: "Reorganization of stored segments to reclaim obsolete versions."
       }
     ]
+  }
+];
+
+const gcbSubsystems: Subsystem[] = [
+  {
+    id: "match-management",
+    title: "Match Management",
+    description: "Handles creation and configuration of cricket matches including format, overs, teams, squads, toss, scheduling, and scorer PIN."
   },
   {
-    id: "upe",
-    title: "UPE",
-    description:
-      "Unified Placement Engine (core MVP component related to placement decisions)."
+    id: "realtime-engine",
+    title: "Real-Time Match Engine",
+    description: "Socket.IO-based synchronization keeping multiple clients in sync with authoritative live match state through match-specific rooms."
   },
   {
-    id: "bil",
-    title: "BIL",
-    description:
-      "Behavior Intelligence Layer (core MVP component providing behavior/workload intelligence)."
+    id: "ball-by-ball-scoring",
+    title: "Ball-by-Ball Scoring",
+    description: "Core domain logic processing individual cricket deliveries: runs, extras, wickets, legal balls, overs, batter/bowler state, free-hit, innings and match progression."
   },
   {
-    id: "discovery",
-    title: "Discovery",
-    description:
-      "Node discovery and networking layer supporting distributed operation. Protocol details are not fabricated."
+    id: "live-match-interface",
+    title: "Live Match Interface",
+    description: "React frontend components for match discovery, live score display, active players, ball controls, over history, and real-time UI updates."
   },
   {
-    id: "engineering-decisions",
-    title: "Engineering Decisions",
-    description: "Decision records and trade-off notes for Yukti."
+    id: "scorecard-results",
+    title: "Scorecard & Match Results",
+    description: "Detailed match statistics, innings information, completed match state, final result, and presentation of recorded match data."
+  },
+  {
+    id: "ai-summary",
+    title: "AI Match Summary",
+    description: "Generates human-readable match summaries from structured ball/innings/result data as an additional layer on top of recorded match data."
+  },
+  {
+    id: "admin-scorer-access",
+    title: "Administration & Scorer Access",
+    description: "Match setup, scorer PIN-based access for match operations, and administrative match deletion."
   }
 ];
 
@@ -160,9 +154,9 @@ export const projects: Project[] = [
     name: "Yukti",
     tagline: "Where Data Behaves",
     shortDescription:
-      "A distributed data-system project whose current engineering focus is building a solid core and Storage Engine, while the larger architecture explores intelligent data behavior and placement.",
+      "A distributed data-system project building a minimal distributed system (IDO, UPE, BIL, Discovery, Storage Engine) with an intelligent data placement vision.",
     longDescription:
-      "Yukti is a Distributed Database Management System (D-DBMS) project. The long-term vision is an intelligent data system where data placement and behavior can be influenced by metadata, workload characteristics, system state, and higher-level intelligence. The current engineering work is deliberately narrower: the agreed MVP is a minimal distributed system containing the core production-oriented components (IDO, UPE, BIL, Discovery, and the Storage Engine). Advanced capabilities such as HBF, replication, consensus, and prediction beyond the current BIL/UPE scope are deferred until the core system is stable.",
+      "Yukti is a Distributed Database Management System (D-DBMS) project. The current engineering focus is an agreed MVP: a minimal distributed system with core production-oriented components (IDO, UPE, BIL, Discovery, and the Storage Engine). The Storage Engine is a key effort—built around Yukti's own object/segment/page model with immutable segments, append-oriented versioned storage, and a derived-index Segment Directory. Advanced capabilities (HBF, replication, consensus, prediction) are deferred until the core is stable.",
     status: "Active engineering project",
     technologies: [],
     pillars: ["system-design", "low-level-design", "mathematics", "implementation"],
@@ -171,73 +165,40 @@ export const projects: Project[] = [
     featured: true
   },
   {
-    id: "airlines-indigo",
-    name: "AIRLINES-INDIGO",
-    tagline: "Flight Status & Notification System",
+    id: "gcb",
+    name: "GCB",
+    tagline: "Gully Cricket Board",
     shortDescription:
-      "A containerized full-stack flight-status and notification system that combines REST APIs, MongoDB persistence, and Socket.IO real-time delivery to propagate flight-status changes to subscribed passengers.",
+      "Real-time full-stack cricket scoring platform with ball-by-ball state management, live Socket.IO synchronization, persistent match data, and scorer/viewer workflows.",
     longDescription:
-      "AIRLINES-INDIGO is a full-stack application that simulates an airline flight-status notification system. Passengers can view flights and flight details, subscribe to flight updates, receive real-time status updates and notifications, and view notification history. An admin can use a dashboard to change flight status (On Time, Delayed, Cancelled, Boarding, Departed), update gate information, and trigger notifications to passengers subscribed to the affected flight. The core engineering story is propagating a persistent flight-state change to exactly the users who care about it while retaining notification history: persistent state, REST, MongoDB persistence, Socket.IO event delivery, subscriber-specific routing, and notification history.",
-    status: "Full-stack real-time system",
+      "GCB is a full-stack real-time cricket scoring and match management platform built around ball-level match state. It combines a React/Vite scorer and viewer interface with a Node.js/Express backend, MongoDB persistence, and Socket.IO synchronization so live match state can be recorded, persisted, and distributed to connected clients in real time. The system models cricket as an evolving state machine where each delivery affects multiple dependent state variables (score, wickets, legal balls, overs, striker/non-striker, bowler, innings, target, result). Key engineering aspects include stateful domain modeling, real-time synchronization via Socket.IO match rooms, persistent ball-level data storage, and a scorer-oriented UI composed of dedicated components for ball controls, player selection, over history, and score presentation.",
+    status: "Full-stack real-time application",
     technologies: [
       "React",
+      "JavaScript",
       "Vite",
-      "Tailwind CSS",
       "Node.js",
       "Express",
-      "Socket.IO",
       "MongoDB",
       "Mongoose",
-      "Docker",
-      "Docker Compose"
+      "Socket.IO",
+      "Zustand",
+      "React Router"
     ],
     pillars: ["system-design", "low-level-design", "implementation"],
-    subsystems: [
-      {
-        id: "architecture",
-        title: "Architecture",
-        description: "Full-stack architecture: frontend, backend, MongoDB, REST, and Socket.IO."
-      },
-      {
-        id: "rest-api",
-        title: "REST API",
-        description: "Routes, controllers, services, and validation behind /api."
-      },
-      {
-        id: "real-time-layer",
-        title: "Real-Time Layer",
-        description: "Socket.IO delivery of flight updates and targeted notifications."
-      },
-      {
-        id: "subscription-system",
-        title: "Subscription System",
-        description: "Passenger subscriptions and subscriber-specific routing."
-      },
-      {
-        id: "notification-pipeline",
-        title: "Notification Pipeline",
-        description: "Persisted notifications plus live Socket.IO delivery."
-      },
-      {
-        id: "database-design",
-        title: "Database Design",
-        description: "MongoDB data models, relationships, and integrity constraints."
-      },
-      {
-        id: "docker-infrastructure",
-        title: "Docker / Docker Compose",
-        description: "Containerized multi-service local environment."
-      },
-      {
-        id: "frontend",
-        title: "Frontend",
-        description: "React UI with REST (Axios) and Socket.IO client communication."
-      }
-    ],
+    subsystems: gcbSubsystems,
     links: [
       {
-        label: "Source",
-        href: "https://github.com/adityacoderr/AIRLINES-INDIGO"
+        label: "Live Demo",
+        href: "https://gcb-frontend-henna.vercel.app"
+      },
+      {
+        label: "Frontend Source",
+        href: "https://github.com/adityacoderr/GCB-Frontend"
+      },
+      {
+        label: "Backend Source",
+        href: "https://github.com/adityacoderr/GCB-Backend"
       }
     ],
     featured: true
@@ -641,174 +602,50 @@ export const technicalWorks: TechnicalWork[] = [
     relatedNoteIds: []
   },
   {
-    id: "airlines-status-event-flow",
-    title: "Flight Status Mutation & Event Flow",
-    projectId: "airlines-indigo",
-    subsystemId: "rest-api",
+    id: "gcb-ball-level-state",
+    title: "Ball-Level Match State",
+    projectId: "gcb",
+    subsystemId: "ball-by-ball-scoring",
     pillars: ["system-design", "low-level-design", "implementation"],
     type: "case-study",
-    tags: ["event-flow", "state-change", "case-study"],
+    tags: ["domain-modeling", "state-management", "cricket"],
     summary:
-      "The primary event trigger of the system: an admin status change is validated, persisted in MongoDB, broadcast to dashboard clients, and routed to exactly the subscribed passengers as targeted Socket.IO notifications.",
+      "A cricket score cannot safely be represented as one mutable total because each delivery affects multiple pieces of state. GCB persists individual ball events and derives/updates innings state from those events.",
     sections: [
       {
         label: "Problem",
         blocks: [
           {
             kind: "paragraph",
-            text: "When an admin changes a flight status, the change must be validated, persisted, visible to everyone viewing the flight, and routed to exactly the passengers subscribed to that flight. The strongest technical concept is persistent state change + event propagation + subscriber-specific notification delivery."
+            text: "Cricket has many dependent state variables. Changing one event can affect score, wickets, legal balls, over, striker, non-striker, bowler, innings, target, and result simultaneously. A simple score total is insufficient."
           }
         ]
       },
       {
-        label: "Mutation flow",
+        label: "Implementation",
         blocks: [
-          {
-            kind: "flow",
-            steps: [
-              "Request",
-              "Validate flight ID",
-              "Find existing flight",
-              "Check for meaningful change",
-              "Update flight in database",
-              "Broadcast flightUpdated",
-              "Find subscribers",
-              "Create notification for each subscriber",
-              "Emit notification to each user's Socket.IO room",
-              "Return updated flight + notification count"
-            ]
-          }
-        ]
-      },
-      {
-        label: "Trigger endpoint",
-        blocks: [
-          {
-            kind: "code",
-            label: "Primary event trigger",
-            language: "text",
-            code: "POST /api/flights/:id/status\n\nChanges: Status, Reason, Gate"
-          },
           {
             kind: "paragraph",
-            text: "This endpoint is the primary event trigger. It validates the MongoDB ObjectId of the flight, checks that the change is meaningful, persists the update, and then drives both delivery channels."
+            text: "Persist individual ball events with batter, bowler, runs, extras, wicket, dismissal info, legal-ball state, over state, and striker/non-striker. Derive innings state from the sequence of ball events rather than maintaining a single mutable aggregate."
+          },
+          {
+            kind: "code",
+            label: "Ball event conceptual model",
+            language: "text",
+            code: "Ball\n  ├── batter\n  ├── bowler\n  ├── runs\n  ├── extras\n  ├── wicket\n  ├── dismissal information\n  ├── legal-ball state\n  ├── over state\n  ├── striker/non-striker\n  └── innings state"
           }
         ]
       },
       {
-        label: "Two delivery channels",
+        label: "Impact",
         blocks: [
           {
             kind: "list",
             items: [
-              "flightUpdated: broadcast to dashboard and flight viewers (everyone watching the flight state).",
-              "notification: emitted to the specific user's Socket.IO room (exactly the subscribed passengers)."
+              "Provides a structured foundation for scorecards, over history, result calculation, and future match analytics.",
+              "Enables accurate reconstruction of match state at any point.",
+              "Supports cricket-specific rules: wides/no-balls not counting as legal balls, free hits, striker changes on runs/wickets, over transitions, innings completion."
             ]
-          }
-        ]
-      },
-      {
-        label: "End-to-end passenger flow",
-        blocks: [
-          {
-            kind: "flow",
-            steps: [
-              "Open Dashboard",
-              "View Flights",
-              "Open Flight Details",
-              "Subscribe to Flight",
-              "Socket joins user room",
-              "Admin changes flight status",
-              "Backend persists event",
-              "Notification generated",
-              "Socket.IO pushes notification",
-              "Passenger receives update",
-              "Notification remains available in history"
-            ]
-          }
-        ]
-      },
-      {
-        label: "Trade-offs",
-        blocks: [
-          {
-            kind: "list",
-            items: [
-              "REST handles resource retrieval and request/response operations; Socket.IO handles low-latency server-to-client updates.",
-              "Notifications are both stored and pushed: a real-time experience plus historical access.",
-              "User-specific rooms (user:<userId>) allow targeted delivery instead of broadcasting every notification to every client."
-            ]
-          }
-        ]
-      }
-    ],
-    relatedNoteIds: ["airlines-realtime-notes"]
-  },
-  {
-    id: "airlines-architecture",
-    title: "System Architecture: REST + Real-Time + Persistence",
-    projectId: "airlines-indigo",
-    subsystemId: "architecture",
-    pillars: ["system-design"],
-    type: "design-record",
-    tags: ["architecture", "full-stack", "event-driven"],
-    summary:
-      "A containerized full-stack flight-status notification system combining REST APIs, MongoDB persistence, and Socket.IO real-time delivery, presented as an event-propagation system rather than a stack list.",
-    sections: [
-      {
-        label: "Problem",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "How do you propagate a persistent flight-state change to exactly the users who care about it, while retaining notification history? The system combines state, REST, persistence, push/event delivery, subscription routing, and notification history."
-          }
-        ]
-      },
-      {
-        label: "Architecture",
-        blocks: [
-          {
-            kind: "code",
-            label: "Docker Compose topology",
-            language: "text",
-            code: "                         Docker Compose\n                              |\n             ┌────────────────┼────────────────┐\n             │                │                │\n             ▼                ▼                ▼\n        Frontend          Backend           MongoDB\n        React/Vite        Node/Express       Mongo\n          :5173              :5000\n             │                │\n             │      REST      │\n             └───────────────►│\n                              │\n                              │ Socket.IO\n                              ▼\n                         Connected Clients"
-          },
-          {
-            kind: "paragraph",
-            text: "The backend depends on MongoDB; the frontend depends on the backend. Backend exposes port 5000, frontend exposes port 5173, and MongoDB uses a named Docker volume."
-          }
-        ]
-      },
-      {
-        label: "Frontend communication",
-        blocks: [
-          {
-            kind: "code",
-            label: "Dual communication model",
-            language: "text",
-            code: "React UI\n   |\n   ├── Axios ───────────────► Express REST API\n   |\n   └── Socket.IO Client ────► Socket.IO Server"
-          },
-          {
-            kind: "paragraph",
-            text: "This dual communication model is an important system-design detail: Axios handles HTTP requests, while Socket.IO Client handles real-time updates."
-          }
-        ]
-      },
-      {
-        label: "Core insight",
-        blocks: [
-          {
-            kind: "callout",
-            text: "Persistent state change + event propagation + subscriber-specific notification delivery. The technology stack supports the engineering story; it is not the story itself."
-          }
-        ]
-      },
-      {
-        label: "Status",
-        blocks: [
-          {
-            kind: "callout",
-            text: "Full-stack real-time system. Local containerized startup via docker compose; the live demo is deployed at airlines-indigo.vercel.app."
           }
         ]
       }
@@ -816,286 +653,59 @@ export const technicalWorks: TechnicalWork[] = [
     relatedNoteIds: []
   },
   {
-    id: "airlines-rest-api",
-    title: "REST API Design",
-    projectId: "airlines-indigo",
-    subsystemId: "rest-api",
-    pillars: ["system-design", "low-level-design"],
-    type: "design-record",
-    tags: ["rest", "api", "layering"],
-    summary:
-      "The /api surface groups flights, subscriptions, and notifications behind a health endpoint, with a layered request flow through routes, controllers, services, and Mongoose models.",
-    sections: [
-      {
-        label: "API surface",
-        blocks: [
-          {
-            kind: "code",
-            label: "Route groups",
-            language: "text",
-            code: "/api/flights\n/api/subscriptions\n/api/notifications\n/api/health"
-          },
-          {
-            kind: "code",
-            label: "Flight routes",
-            language: "text",
-            code: "GET  /api/flights\nGET  /api/flights/:id\nPOST /api/flights/:id/status"
-          },
-          {
-            kind: "code",
-            label: "Subscription routes",
-            language: "text",
-            code: "POST   /api/subscriptions\nGET    /api/subscriptions/:userId\nDELETE /api/subscriptions/:flightId"
-          },
-          {
-            kind: "code",
-            label: "Notification routes",
-            language: "text",
-            code: "GET   /api/notifications/:userId\nPATCH /api/notifications/:id/read"
-          }
-        ]
-      },
-      {
-        label: "Request layering",
-        blocks: [
-          {
-            kind: "flow",
-            steps: ["HTTP Request", "Express Routes", "Controllers", "Services", "Mongoose Models", "MongoDB"]
-          },
-          {
-            kind: "paragraph",
-            text: "Routes define endpoints, controllers handle HTTP-level orchestration and responses, services handle reusable business/data operations, and models define the MongoDB/Mongoose data structures."
-          }
-        ]
-      },
-      {
-        label: "Middleware & errors",
-        blocks: [
-          {
-            kind: "list",
-            items: [
-              "Enables CORS and parses JSON.",
-              "Uses Morgan logging and mounts /api routes.",
-              "Registers centralized error handling after the API routes.",
-              "Controllers forward errors using next(error)."
-            ]
-          },
-          {
-            kind: "paragraph",
-            text: "GET /api/flights/:id validates the MongoDB ObjectId; POST /api/flights/:id/status is the primary event trigger."
-          }
-        ]
-      }
-    ],
-    relatedNoteIds: []
-  },
-  {
-    id: "airlines-realtime-layer",
-    title: "Real-Time Layer with Socket.IO",
-    projectId: "airlines-indigo",
-    subsystemId: "real-time-layer",
+    id: "gcb-realtime-sync",
+    title: "Real-Time Match Synchronization",
+    projectId: "gcb",
+    subsystemId: "realtime-engine",
     pillars: ["system-design", "implementation"],
     type: "design-record",
-    tags: ["websockets", "socket-io", "realtime"],
+    tags: ["socket-io", "realtime", "synchronization"],
     summary:
-      "A Socket.IO server attached to the HTTP server delivers flightUpdated broadcasts to dashboard clients and targeted notification events to per-user rooms.",
+      "Live viewers should see scoring changes without manually refreshing. GCB uses Socket.IO match rooms to broadcast authoritative backend updates to connected clients.",
     sections: [
       {
         label: "Problem",
         blocks: [
           {
             kind: "paragraph",
-            text: "REST alone is pull-based: a client has to ask whether state changed. Flight-status changes need to reach clients with low latency, and notifications must reach exactly the right users."
+            text: "Multiple users need to observe the same live match state in near real time. Polling is inefficient and doesn't scale well for live sports scoring."
           }
         ]
       },
       {
-        label: "Model",
+        label: "Implementation",
         blocks: [
           {
-            kind: "code",
-            label: "Room targeting",
-            language: "text",
-            code: "socket.emit(\"join\", userId)\n\nserver places the socket into:\n  user:<userId>\n\nexample:\n  user:12345"
+            kind: "paragraph",
+            text: "Socket.IO server on the backend. Clients join match-specific rooms (match:<matchId>). On scoring action: backend validates, persists to MongoDB, mutates authoritative match state, emits update to the match room. All connected clients in that room receive the update."
           },
           {
-            kind: "paragraph",
-            text: "On connection the frontend emits join(userId). The backend places the socket into the user:<userId> room, which enables targeted passenger notifications."
+            kind: "code",
+            label: "Real-time flow",
+            language: "text",
+            code: "Scorer action\n    │\n    ▼\nBackend scoring logic\n    │\n    ├── update database\n    │\n    └── emit match update\n             │\n             ▼\n        Match room\n         /       \\\n        /         \\\n   Viewer A     Viewer B\n        \\         /\n         live score"
           }
         ]
       },
       {
-        label: "Events",
+        label: "Key engineering idea",
+        blocks: [
+          {
+            kind: "paragraph",
+            text: "The backend is the source of truth. Match rooms provide natural isolation—Match A updates go to Match A room, Match B updates go to Match B room—avoiding broadcasting every match update to every connected client."
+          }
+        ]
+      },
+      {
+        label: "Impact",
         blocks: [
           {
             kind: "list",
             items: [
-              "flightUpdated: broadcast for dashboard / flight-state updates.",
-              "notification: emitted to the user's Socket.IO room for individual subscribers."
+              "Multiple users can observe the same live match state in near real time.",
+              "Scorer and viewers stay synchronized without polling.",
+              "Match-specific rooms provide natural isolation between concurrent matches."
             ]
-          },
-          {
-            kind: "code",
-            label: "Targeted emission",
-            language: "text",
-            code: "io.to(`user:${subscriber.userId}`).emit(\"notification\", ...)"
-          },
-          {
-            kind: "callout",
-            text: "Do not invent additional event types; the documented set is flightUpdated and notification."
-          }
-        ]
-      },
-      {
-        label: "Trade-off",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "User-specific rooms give targeted delivery instead of broadcasting every notification to every client, at the cost of tracking which room each connected user belongs to."
-          }
-        ]
-      }
-    ],
-    relatedNoteIds: ["airlines-realtime-notes"]
-  },
-  {
-    id: "airlines-subscription-system",
-    title: "Subscription Routing & User Rooms",
-    projectId: "airlines-indigo",
-    subsystemId: "subscription-system",
-    pillars: ["system-design", "low-level-design"],
-    type: "design-record",
-    tags: ["subscriptions", "routing", "indexing"],
-    summary:
-      "Passengers subscribe to flights, the service resolves which users care about a flight, and a unique compound index on (userId, flightId) prevents duplicate subscriptions at the database level.",
-    sections: [
-      {
-        label: "Problem",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "A notification must reach only the passengers subscribed to the affected flight. That requires a subscription record per user/flight pair and a way to resolve all subscribers of a flight."
-          }
-        ]
-      },
-      {
-        label: "Service operations",
-        blocks: [
-          {
-            kind: "code",
-            label: "Subscription API",
-            language: "text",
-            code: "POST   /api/subscriptions\nGET    /api/subscriptions/:userId\nDELETE /api/subscriptions/:flightId"
-          },
-          {
-            kind: "list",
-            items: [
-              "subscribe",
-              "getSubscriptions",
-              "removeSubscription",
-              "getFlightSubscribers"
-            ]
-          },
-          {
-            kind: "paragraph",
-            text: "getFlightSubscribers(flightId) determines which users should receive updates for a flight. It is the bridge between the persisted state change and notification creation."
-          }
-        ]
-      },
-      {
-        label: "Data model",
-        blocks: [
-          {
-            kind: "code",
-            label: "Subscription fields",
-            language: "text",
-            code: "userId\nflightId     references Flight\ncreatedAt\nupdatedAt"
-          }
-        ]
-      },
-      {
-        label: "Integrity",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "A unique compound index on (userId, flightId) prevents duplicate subscriptions for the same user/flight pair at the database level, instead of relying on application checks alone."
-          },
-          {
-            kind: "code",
-            label: "Unique compound index",
-            language: "text",
-            code: "unique index (userId, flightId)"
-          }
-        ]
-      }
-    ],
-    relatedNoteIds: ["airlines-subscription-index-note"]
-  },
-  {
-    id: "airlines-notification-pipeline",
-    title: "Notification Pipeline: Persisted + Live",
-    projectId: "airlines-indigo",
-    subsystemId: "notification-pipeline",
-    pillars: ["system-design", "low-level-design", "implementation"],
-    type: "design-record",
-    tags: ["notifications", "pipeline", "events"],
-    summary:
-      "Notifications are persisted in MongoDB and pushed through Socket.IO, giving both real-time delivery and historical access.",
-    sections: [
-      {
-        label: "Problem",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "A status event must reach the right user in real time and remain accessible later. Pushing alone loses history; storing alone loses the live experience. The pipeline does both."
-          }
-        ]
-      },
-      {
-        label: "Model",
-        blocks: [
-          {
-            kind: "flow",
-            steps: ["Flight Event", "Socket.IO", "Live UI", "Flight Event", "MongoDB", "Notification History"]
-          }
-        ]
-      },
-      {
-        label: "API",
-        blocks: [
-          {
-            kind: "code",
-            label: "Notification routes",
-            language: "text",
-            code: "GET   /api/notifications/:userId\nPATCH /api/notifications/:id/read"
-          },
-          {
-            kind: "paragraph",
-            text: "Users can retrieve notification history and mark notifications as read."
-          }
-        ]
-      },
-      {
-        label: "Data model",
-        blocks: [
-          {
-            kind: "code",
-            label: "Notification fields",
-            language: "text",
-            code: "userId\nflightId\ntype\ntitle\nmessage\nisRead\ncreatedAt\nupdatedAt"
-          }
-        ]
-      },
-      {
-        label: "Types",
-        blocks: [
-          {
-            kind: "list",
-            items: ["ON_TIME", "DELAYED", "CANCELLED", "BOARDING", "DEPARTED", "GATE_CHANGED"]
-          },
-          {
-            kind: "callout",
-            text: "These are the documented notification types. Do not assume every type is triggered by every code path without verification."
           }
         ]
       }
@@ -1103,114 +713,155 @@ export const technicalWorks: TechnicalWork[] = [
     relatedNoteIds: []
   },
   {
-    id: "airlines-data-model",
-    title: "Data Model & Integrity",
-    projectId: "airlines-indigo",
-    subsystemId: "database-design",
-    pillars: ["low-level-design", "system-design"],
-    type: "design-record",
-    tags: ["data-model", "mongodb", "indexing"],
+    id: "gcb-scorer-ui",
+    title: "Scorer-Oriented UI",
+    projectId: "gcb",
+    subsystemId: "live-match-interface",
+    pillars: ["low-level-design", "implementation"],
+    type: "case-study",
+    tags: ["ui", "workflow", "react", "zustand"],
     summary:
-      "The Flight, Subscription, and Notification collections, their relationships, and their constraints, including the status enum, unique flightNumber, and the compound index protecting subscription integrity.",
+      "Ball entry requires frequent, context-sensitive actions. GCB breaks the match screen into dedicated components for ball controls, batter/bowler selection, over history, and score presentation, coordinated via Zustand.",
     sections: [
       {
         label: "Problem",
         blocks: [
           {
             kind: "paragraph",
-            text: "Three entities drive the system (Flight, Subscription, and Notification), and the relationships between them must stay consistent under concurrent reads and writes."
+            text: "The scorer needs to enter ball-by-ball data quickly while seeing current match context: active batters, bowler, score, overs, recent balls. A single monolithic component would be unwieldy."
           }
         ]
       },
       {
-        label: "Flight model",
+        label: "Implementation",
         blocks: [
           {
-            kind: "code",
-            label: "Flight fields",
-            language: "text",
-            code: "flightNumber    unique\norigin\ndestination\ndepartureTime\narrivalTime\nstatus\ngate\ndelayReason\ncreatedAt\nupdatedAt"
+            kind: "list",
+            items: [
+              "BallControls.jsx: primary scoring input interface",
+              "SelectBowlerModal.jsx / SelectNextBatterModal.jsx / NewBatsmanModal.jsx: player selection flows",
+              "OverEntry.jsx / OverHistory.jsx: over-level context",
+              "ScoreHeader.jsx / BatterCard.jsx: current match state display",
+              "FullScorecard.jsx: analytical/read-oriented view",
+              "MatchResult.jsx: completed match presentation",
+              "Zustand store (matchStore.js): centralized client-side match state"
+            ]
           },
           {
             kind: "paragraph",
-            text: "Flight status is constrained to On Time, Delayed, Cancelled, Boarding, and Departed. flightNumber is unique."
+            text: "Components read from shared Zustand state rather than independently fetching. Socket.IO updates mutate the store, triggering reactive UI updates across all components."
           }
         ]
       },
       {
-        label: "Relationships",
+        label: "Impact",
         blocks: [
           {
-            kind: "code",
-            label: "Data relationships",
-            language: "text",
-            code: "Flight\n  |\n  ├───────────────┐\n  │               │\n  ▼               ▼\nSubscription   Notification\n  │               │\n  └── userId ─────┘"
-          },
-          {
-            kind: "paragraph",
-            text: "Subscription.flightId and Notification.flightId both reference Flight; both contain a userId."
-          }
-        ]
-      },
-      {
-        label: "Integrity",
-        blocks: [
-          {
-            kind: "paragraph",
-            text: "The Subscription collection has a unique compound index on (userId, flightId), preventing duplicate subscriptions for the same user/flight pair."
+            kind: "list",
+            items: [
+              "Keeps the scoring workflow focused while allowing the rest of the match state to remain visible.",
+              "Separation of scoring UI (write-oriented) from scorecard (read-oriented) matches real cricket workflows.",
+              "Centralized client state prevents inconsistency between components showing the same match data."
+            ]
           }
         ]
       }
     ],
-    relatedNoteIds: ["airlines-subscription-index-note"]
+    relatedNoteIds: []
   },
   {
-    id: "airlines-docker-compose",
-    title: "Containerized Architecture with Docker Compose",
-    projectId: "airlines-indigo",
-    subsystemId: "docker-infrastructure",
-    pillars: ["system-design", "implementation"],
+    id: "gcb-cricket-state-handling",
+    title: "Cricket-Specific State Handling",
+    projectId: "gcb",
+    subsystemId: "ball-by-ball-scoring",
+    pillars: ["low-level-design", "implementation"],
     type: "design-record",
-    tags: ["docker", "docker-compose", "infrastructure"],
+    tags: ["domain-logic", "state-machine", "validation"],
     summary:
-      "Three primary Compose services (frontend, backend, and MongoDB) with a named volume for database persistence and a documented docker compose up --build startup.",
+      "Cricket contains rules around legal deliveries, overs, wickets, striker changes, innings, and targets. GCB encodes these transitions in backend scoring logic rather than treating scoring as simple arithmetic.",
     sections: [
       {
         label: "Problem",
         blocks: [
           {
             kind: "paragraph",
-            text: "The application is a multi-service system. Docker packages it into a reproducible local environment instead of depending on manual setup of Node and MongoDB."
+            text: "One delivery can: add runs, change striker, add extras, count/not count as legal ball, produce wicket, trigger free hit, end over, end innings, potentially end match. These rules are interdependent."
           }
         ]
       },
       {
-        label: "Compose model",
+        label: "Implementation",
         blocks: [
           {
-            kind: "code",
-            label: "docker-compose.yml",
-            language: "text",
-            code: "docker-compose.yml\n│\n├── mongodb\n│   ├── mongo:8\n│   └── persistent volume\n│\n├── backend\n│   ├── build: ./backend\n│   ├── port: 5000\n│   └── depends_on: mongodb\n│\n└── frontend\n    ├── build: ./frontend\n    ├── port: 5173\n    └── depends_on: backend"
+            kind: "list",
+            items: [
+              "Innings state machine: MATCH_CREATED → SETUP → INNINGS_1 → INNINGS_1_COMPLETE → INNINGS_2 → TARGET_REACHED/OVERS_EXHAUSTED/ALL_OUT → MATCH_COMPLETE",
+              "Legal ball determination: wides/no-balls don't increment ball count; free hit state after no-ball",
+              "Striker/non-striker swap on odd runs, end of over, wicket",
+              "Bowler change at over boundary",
+              "Target calculation for second innings",
+              "Result determination: target reached, overs exhausted, all out, follow-on, declaration"
+            ]
           }
         ]
       },
       {
-        label: "Persistence & demo data",
+        label: "Impact",
+        blocks: [
+          {
+            kind: "list",
+            items: [
+              "Makes the application capable of representing actual match progression.",
+              "Backend owns authoritative match state; frontend renders that state.",
+              "Enables accurate scorecards, over history, and AI summaries derived from structured data."
+            ]
+          }
+        ]
+      }
+    ],
+    relatedNoteIds: []
+  },
+  {
+    id: "gcb-fullstack-state-flow",
+    title: "Full-Stack State Flow",
+    projectId: "gcb",
+    subsystemId: "realtime-engine",
+    pillars: ["system-design", "implementation"],
+    type: "design-record",
+    tags: ["architecture", "rest", "websockets", "persistence"],
+    summary:
+      "The frontend and backend must remain consistent during a live match. GCB uses REST for commands/data access, MongoDB for persistence, and Socket.IO for live propagation.",
+    sections: [
+      {
+        label: "Problem",
         blocks: [
           {
             kind: "paragraph",
-            text: "MongoDB uses a named volume (mongo_data:/data/db), separating database data from the container lifecycle. The repository also contains demo MongoDB backup data restored with mongorestore; present this as demo-data restoration, not as a production backup architecture."
+            text: "A live match involves commands (scoring actions), queries (match state, scorecard), persistence (ball logs, innings, results), and real-time updates. These must stay consistent."
           }
         ]
       },
       {
-        label: "Boundaries",
+        label: "Implementation",
         blocks: [
           {
-            kind: "callout",
-            variant: "warning",
-            text: "Do not exaggerate this into Kubernetes, cloud orchestration, or a production container platform. The Vercel deployment is the live demo; the Docker Compose stack itself is not running on Vercel."
+            kind: "code",
+            label: "Communication model",
+            language: "text",
+            code: "REST API\n    ├── Match creation\n    ├── Match state retrieval\n    ├── Scoring actions (commands)\n    ├── Scorecard / history queries\n    └── Admin operations\n\nSocket.IO\n    ├── Match room join/leave\n    ├── Live state updates (server → client)\n    └── Scoring action acknowledgments\n\nMongoDB\n    ├── Matches\n    ├── Squads / Players\n    ├── Innings\n    ├── Ball logs\n    ├── Results\n    └── Match metadata"
+          }
+        ]
+      },
+      {
+        label: "Impact",
+        blocks: [
+          {
+            kind: "list",
+            items: [
+              "Creates a clear separation between authoritative server state and client presentation.",
+              "REST handles request/response operations; Socket.IO handles low-latency server-to-client updates.",
+              "Persistent ball-level data enables scorecards, over history, and analytics after the match ends."
+            ]
           }
         ]
       }
@@ -1468,52 +1119,6 @@ export const notes: EngineeringNote[] = [
         ]
       }
     ]
-  },
-  {
-    id: "airlines-realtime-notes",
-    title: "Real-Time Delivery with Socket.IO",
-    description:
-      "Planned note on the Socket.IO layer: user rooms, the flightUpdated broadcast, and targeted notification emission.",
-    category: "Real-Time Systems",
-    tags: ["socket-io", "realtime", "websockets"],
-    relatedProjectId: "airlines-indigo",
-    relatedSubsystemId: "real-time-layer",
-    pillarIds: ["system-design", "implementation"],
-    status: "planned",
-    content: [
-      {
-        label: "Status",
-        blocks: [
-          {
-            kind: "callout",
-            text: "Planned note. The design record documents the verified architecture; this article will go deeper into the implementation."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: "airlines-subscription-index-note",
-    title: "Compound Indexes and Subscription Integrity",
-    description:
-      "Planned note on the unique (userId, flightId) compound index that prevents duplicate flight subscriptions at the database level.",
-    category: "Database Design",
-    tags: ["mongodb", "indexing", "integrity"],
-    relatedProjectId: "airlines-indigo",
-    relatedSubsystemId: "database-design",
-    pillarIds: ["low-level-design", "system-design"],
-    status: "planned",
-    content: [
-      {
-        label: "Status",
-        blocks: [
-          {
-            kind: "callout",
-            text: "Planned note. Content will be written from the verified data model when the article is published."
-          }
-        ]
-      }
-    ]
   }
 ];
 
@@ -1524,27 +1129,27 @@ export const stackGroups = [
   },
   {
     label: "Languages",
-    items: ["TypeScript (portfolio)", "Go (Yukti design consideration)", "JavaScript / Node.js (AIRLINES-INDIGO)"]
+    items: ["TypeScript (portfolio)", "Go (Yukti design consideration)"]
   },
   {
     label: "Frontend",
-    items: ["React", "Vite", "Tailwind CSS", "React Router", "Socket.IO Client"]
+    items: ["React", "Vite", "Tailwind CSS", "React Router"]
   },
   {
     label: "Backend",
-    items: ["Node.js", "Express", "Socket.IO", "Mongoose"]
+    items: []
   },
   {
     label: "Databases",
-    items: ["MongoDB", "SQL", "Cassandra", "RocksDB", "DynamoDB", "Amazon Aurora"]
+    items: ["SQL", "Cassandra", "RocksDB", "DynamoDB", "Amazon Aurora"]
   },
   {
     label: "Infrastructure",
-    items: ["Docker", "Docker Compose", "Vercel (demo deployment)"]
+    items: ["Docker", "Docker Compose"]
   },
   {
     label: "Systems",
-    items: ["Distributed Systems (Yukti)", "Storage Engines", "Real-Time Event Delivery", "Networking"]
+    items: ["Distributed Systems (Yukti)", "Storage Engines", "Networking"]
   },
   {
     label: "Tools",
