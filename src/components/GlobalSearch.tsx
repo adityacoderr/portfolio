@@ -252,6 +252,7 @@ export default function GlobalSearch() {
   const [query, setQuery] = useState("");
   const [desktopOpen, setDesktopOpen] = useState(false);
   const desktopInputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const normalized = normalizeQuery(query);
 
@@ -401,6 +402,20 @@ export default function GlobalSearch() {
     return () => window.removeEventListener("open-global-search", onOpen as EventListener);
   }, []);
 
+  // Click outside panel closes (backdrop + any outside click)
+  useEffect(() => {
+    if (!desktopOpen) return;
+    const onPointerDown = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (panelRef.current && !panelRef.current.contains(target)) {
+        setDesktopOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, [desktopOpen]);
+
   const handleNavigate = (href: string) => {
     setDesktopOpen(false);
     setQuery("");
@@ -438,9 +453,14 @@ export default function GlobalSearch() {
             className="absolute inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
             onClick={() => {
               setDesktopOpen(false);
+              setQuery("");
             }}
           />
-          <div className="relative mx-auto mt-[6vh] lg:mt-[12vh] w-full max-w-2xl px-4">
+          <div
+            ref={panelRef}
+            onClick={(e) => e.stopPropagation()}
+            className="relative mx-auto mt-[6vh] lg:mt-[12vh] w-full max-w-2xl px-4"
+          >
             <div className="overflow-hidden rounded-xl border border-line bg-panel shadow-soft">
               <div className="flex items-center gap-3 border-b border-line px-4 py-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6d675f" strokeWidth="2">
