@@ -269,6 +269,7 @@ export default function GlobalSearch() {
   const hasQuery = normalized.length > 0;
 
   // Type-to-focus for desktop: any printable char opens desktop search when no input focused
+  // + digit shortcuts 1-9 to open nth result
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -305,6 +306,31 @@ export default function GlobalSearch() {
         return;
       }
 
+      // Digit shortcuts: press 1-9 to open nth visible result when palette is open
+      if (desktopOpen && hasQuery && results.length > 0 && /^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (idx < results.length && idx < 9) {
+          e.preventDefault();
+          const href = results[idx].href;
+          // inline navigate to avoid stale closure on handleNavigate
+          setDesktopOpen(false);
+          setQuery("");
+          if (href.startsWith("http")) {
+            window.open(href, "_blank", "noopener,noreferrer");
+          } else if (href.includes("#")) {
+            const [, hash] = href.split("#");
+            navigateTo(href);
+            setTimeout(() => {
+              const el = document.getElementById(hash);
+              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 100);
+          } else {
+            navigateTo(href);
+          }
+          return;
+        }
+      }
+
       // If already focused in an input, let natural typing happen
       // For mobile input, we handle via onChange; for desktopOpen we also handle via input.
       if (isEditable) return;
@@ -334,7 +360,7 @@ export default function GlobalSearch() {
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [desktopOpen]);
+  }, [desktopOpen, hasQuery, results]);
 
   // Focus desktop input when opened
   useEffect(() => {
@@ -442,9 +468,12 @@ export default function GlobalSearch() {
                 />
               </div>
 
-              <div className="border-t border-line bg-paper px-4 py-2.5 flex items-center justify-between font-mono text-[11px] text-muted">
+              <div className="border-t border-line bg-paper px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-muted">
                 <span>{hasQuery ? `${results.length} result${results.length === 1 ? "" : "s"} · projects, notes, journey, achievements & about` : `${searchItems.length} searchable items`}</span>
-                <span className="hidden sm:inline">↵ to open · ESC to close</span>
+                <span className="hidden sm:inline">
+                  {hasQuery && results.length > 0 ? "press 1 for 1st · 2 for 2nd · 3 for 3rd … 9 to open · " : ""}
+                  ↵ to open · ESC to close
+                </span>
               </div>
             </div>
             <p className="mt-3 text-center font-mono text-xs text-paper/80">Tip: just start typing anywhere — no need to click</p>
@@ -547,49 +576,75 @@ function SearchResultsList({
     page: { label: "Page", color: "bg-ink text-paper border-ink", dot: "bg-ink" },
   } as const;
 
-  const renderItem = (item: SearchItem) => (
-    <li key={`${item.kind}-${item.id}`}>
-      <button
-        type="button"
-        onMouseDown={(e) => e.preventDefault()}
-        onClick={() => onNavigate(item.href)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") onNavigate(item.href);
-        }}
-        className="flex w-full flex-col gap-1 px-4 py-3 text-left hover:bg-paper transition"
-      >
-        <span className="flex flex-wrap items-center gap-2">
-          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ${kindMeta[item.kind].color}`}>
-            <span className={`h-1.5 w-1.5 rounded-full bg-paper`} aria-hidden="true" />
-            {kindMeta[item.kind].label}
+  // Number badge for side hint: shows "1" ... "9" on the side of each result
+  const getItemNumber = (item: SearchItem): number | null => {
+    const idx = results.indexOf(item);
+    if (idx === -1 || idx >= 9) return null;
+    return idx + 1;
+  };
+
+  const renderItem = (item: SearchItem) => {
+    const num = getItemNumber(item);
+    return (
+      <li key={`${item.kind}-${item.id}`}>
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onNavigate(item.href)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onNavigate(item.href);
+          }}
+          className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-paper transition"
+        >
+          {num !== null && (
+            <span
+              aria-hidden="true"
+              className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-line bg-paper font-mono text-xs font-semibold text-muted shadow-sm"
+              title={`Press ${num} to open`}
+            >
+              {num}
+            </span>
+          )}
+          <span className="flex min-w-0 flex-1 flex-col gap-1">
+            <span className="flex flex-wrap items-center gap-2">
+              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wide ${kindMeta[item.kind].color}`}>
+                <span className={`h-1.5 w-1.5 rounded-full bg-paper`} aria-hidden="true" />
+                {kindMeta[item.kind].label}
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-wide rounded bg-paper border border-line px-1.5 py-0.5 text-muted">{item.status}</span>
+              {item.category && <span className="font-mono text-[10px] text-muted hidden sm:inline">· {item.category}</span>}
+            </span>
+            <span className="text-sm font-semibold text-ink line-clamp-1">
+              <Highlight text={item.title} query={query} />
+            </span>
+            <span className="text-sm leading-6 text-muted line-clamp-2">
+              <Highlight text={item.description} query={query} />
+            </span>
+            {item.displayTags.length > 0 && (
+              <span className="flex flex-wrap gap-1.5 pt-1">
+                {item.displayTags.map((tag) => {
+                  const isMatch = tag.toLowerCase().includes(query.toLowerCase());
+                  return (
+                    <span
+                      key={tag}
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-xs transition ${isMatch ? "border-rust bg-rust text-paper" : "border-line bg-paper text-muted"}`}
+                    >
+                      <TagWithHighlight tag={tag} query={query} />
+                    </span>
+                  );
+                })}
+              </span>
+            )}
           </span>
-          <span className="font-mono text-[10px] uppercase tracking-wide rounded bg-paper border border-line px-1.5 py-0.5 text-muted">{item.status}</span>
-          {item.category && <span className="font-mono text-[10px] text-muted hidden sm:inline">· {item.category}</span>}
-        </span>
-        <span className="text-sm font-semibold text-ink line-clamp-1">
-          <Highlight text={item.title} query={query} />
-        </span>
-        <span className="text-sm leading-6 text-muted line-clamp-2">
-          <Highlight text={item.description} query={query} />
-        </span>
-        {item.displayTags.length > 0 && (
-          <span className="flex flex-wrap gap-1.5 pt-1">
-            {item.displayTags.map((tag) => {
-              const isMatch = tag.toLowerCase().includes(query.toLowerCase());
-              return (
-                <span
-                  key={tag}
-                  className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-xs transition ${isMatch ? "border-rust bg-rust text-paper" : "border-line bg-paper text-muted"}`}
-                >
-                  <TagWithHighlight tag={tag} query={query} />
-                </span>
-              );
-            })}
-          </span>
-        )}
-      </button>
-    </li>
-  );
+          {num !== null && (
+            <span className="hidden sm:inline-flex shrink-0 items-center gap-1 font-mono text-[10px] text-muted/70 mt-1">
+              press <kbd className="rounded border border-line bg-paper px-1 py-0.5 text-[10px] text-muted">{num}</kbd>
+            </span>
+          )}
+        </button>
+      </li>
+    );
+  };
 
   return (
     <div className={variant === "desktop" ? "py-2" : "py-2"}>
