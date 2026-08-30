@@ -167,8 +167,8 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
             <a className="button-secondary !px-3 !py-2 !min-h-10 text-xs sm:text-sm" href={contact.github} rel="noreferrer" target="_blank">
               GitHub
             </a>
-            <a className="button-primary !px-3 !py-2 !min-h-10 text-xs sm:text-sm" href={`mailto:${contact.email}`}>
-              Contact
+            <a className="button-primary !px-3 !py-2 !min-h-10 text-xs sm:text-sm" href={contact.linkedin} rel="noreferrer" target="_blank">
+              LinkedIn
             </a>
           </div>
         </nav>
