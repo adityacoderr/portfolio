@@ -268,6 +268,19 @@ export default function GlobalSearch() {
 
   const hasQuery = normalized.length > 0;
 
+  // Display order is grouped by kind (matches rendered order) so numbering 1,2,3 is sequential
+  const orderedResults = useMemo(() => {
+    const kindOrder: Record<SearchItem["kind"], number> = {
+      project: 0,
+      work: 1,
+      note: 2,
+      journey: 3,
+      achievement: 4,
+      page: 5,
+    };
+    return [...results].sort((a, b) => kindOrder[a.kind] - kindOrder[b.kind] || results.indexOf(a) - results.indexOf(b));
+  }, [results]);
+
   // Type-to-focus for desktop: any printable char opens desktop search when no input focused
   // + digit shortcuts 1-9 to open nth result
   useEffect(() => {
@@ -307,11 +320,11 @@ export default function GlobalSearch() {
       }
 
       // Digit shortcuts: press 1-9 to open nth visible result when palette is open
-      if (desktopOpen && hasQuery && results.length > 0 && /^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      if (desktopOpen && hasQuery && orderedResults.length > 0 && /^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
         const idx = parseInt(e.key, 10) - 1;
-        if (idx < results.length && idx < 9) {
+        if (idx < orderedResults.length && idx < 9) {
           e.preventDefault();
-          const href = results[idx].href;
+          const href = orderedResults[idx].href;
           // inline navigate to avoid stale closure on handleNavigate
           setDesktopOpen(false);
           setQuery("");
@@ -360,7 +373,7 @@ export default function GlobalSearch() {
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [desktopOpen, hasQuery, results]);
+  }, [desktopOpen, hasQuery, orderedResults]);
 
   // Focus desktop input when opened
   useEffect(() => {
@@ -589,9 +602,10 @@ function SearchResultsList({
     page: { label: "Page", color: "bg-ink text-paper border-ink", dot: "bg-ink" },
   } as const;
 
-  // Number badge for side hint: shows "1" ... "9" on the side of each result
+  // Number badge is sequential in display order (1,2,3...) not score order, so grouped lists don't look random
+  const orderedForDisplay = [...projectItems, ...works, ...noteItems, ...journeyItems, ...achievementItems, ...pageItems];
   const getItemNumber = (item: SearchItem): number | null => {
-    const idx = results.indexOf(item);
+    const idx = orderedForDisplay.indexOf(item);
     if (idx === -1 || idx >= 9) return null;
     return idx + 1;
   };
