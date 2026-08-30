@@ -4,11 +4,51 @@
 
 @layer base {
   :root {
+    --color-paper: #f7f4ee;
+    --color-paper-rgb: 247 244 238;
+    --color-ink: #1d1c19;
+    --color-ink-rgb: 29 28 25;
+    --color-muted: #6d675f;
+    --color-muted-rgb: 109 103 95;
+    --color-line: #d8d0c3;
+    --color-line-rgb: 216 208 195;
+    --color-panel: #fffdf8;
+    --color-panel-rgb: 255 253 248;
+    --color-steel: #334155;
+    --color-steel-rgb: 51 65 85;
+    --color-moss: #3f5d50;
+    --color-moss-rgb: 63 93 80;
+    --color-rust: #8a4b33;
+    --color-rust-rgb: 138 75 51;
+    --color-graph: #245c73;
+    --color-graph-rgb: 36 92 115;
     color-scheme: light;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  html.dark {
+    --color-paper: #0f1113;
+    --color-paper-rgb: 15 17 19;
+    --color-ink: #e8e6dd;
+    --color-ink-rgb: 232 230 221;
+    --color-muted: #a8a29a;
+    --color-muted-rgb: 168 162 154;
+    --color-line: #2b2e33;
+    --color-line-rgb: 43 46 51;
+    --color-panel: #1a1d1f;
+    --color-panel-rgb: 26 29 31;
+    --color-steel: #94a3b8;
+    --color-steel-rgb: 148 163 184;
+    --color-moss: #6da08f;
+    --color-moss-rgb: 109 160 143;
+    --color-rust: #d47a5a;
+    --color-rust-rgb: 212 122 90;
+    --color-graph: #6bb8d6;
+    --color-graph-rgb: 107 184 214;
+    color-scheme: dark;
   }
 
   * {
@@ -22,12 +62,17 @@
   body {
     margin: 0;
     min-width: 320px;
-    background: #f7f4ee;
-    color: #1d1c19;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   ::selection {
     background: rgba(138, 75, 51, 0.22);
+  }
+
+  html.dark ::selection {
+    background: rgba(212, 122, 90, 0.32);
   }
 
   ::-webkit-scrollbar {
@@ -40,13 +85,13 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #d8d0c3;
-    border: 3px solid #f7f4ee;
+    background: var(--color-line);
+    border: 3px solid var(--color-paper);
     border-radius: 6px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #8a4b33;
+    background: var(--color-rust);
   }
 
   a {
@@ -263,6 +308,10 @@
     @apply overflow-x-auto rounded-md bg-[#141310] p-4 font-mono text-[13px] leading-relaxed text-[#e8e2d6] md:p-5;
   }
 
+  html.dark .code-block {
+    @apply border border-line;
+  }
+
   .code-block code {
     @apply whitespace-pre;
   }
@@ -299,6 +348,10 @@
     @apply relative flex flex-col overflow-hidden rounded-md border border-ink bg-panel p-5 shadow-[0_2px_10px_rgba(29,28,25,0.06)] md:p-8;
   }
 
+  html.dark .featured-panel {
+    @apply shadow-[0_2px_16px_rgba(0,0,0,0.4)];
+  }
+
   .featured-panel::before {
     @apply absolute inset-x-0 top-0 h-1 content-[''] bg-gradient-to-r from-rust via-moss to-graph;
   }
@@ -330,4 +383,10 @@
   .about-statement p {
     @apply text-2xl font-medium leading-snug text-ink;
   }
+}
+
+/* Dark overrides for hard-coded hero grid fades */
+html.dark .hero [style*="linear-gradient(to right, #d8d0c3"] {
+  background-image: linear-gradient(to right, #2b2e33 1px, transparent 1px),
+    linear-gradient(to bottom, #2b2e33 1px, transparent 1px) !important;
 }

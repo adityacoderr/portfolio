@@ -1,18 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        paper: "#f7f4ee",
-        ink: "#1d1c19",
-        muted: "#6d675f",
-        line: "#d8d0c3",
-        panel: "#fffdf8",
-        steel: "#334155",
-        moss: "#3f5d50",
-        rust: "#8a4b33",
-        graph: "#245c73"
+        paper: "rgb(var(--color-paper-rgb) / <alpha-value>)",
+        ink: "rgb(var(--color-ink-rgb) / <alpha-value>)",
+        muted: "rgb(var(--color-muted-rgb) / <alpha-value>)",
+        line: "rgb(var(--color-line-rgb) / <alpha-value>)",
+        panel: "rgb(var(--color-panel-rgb) / <alpha-value>)",
+        steel: "rgb(var(--color-steel-rgb) / <alpha-value>)",
+        moss: "rgb(var(--color-moss-rgb) / <alpha-value>)",
+        rust: "rgb(var(--color-rust-rgb) / <alpha-value>)",
+        graph: "rgb(var(--color-graph-rgb) / <alpha-value>)"
       },
       fontFamily: {
         sans: ['"Inter"', "ui-sans-serif", "system-ui", "sans-serif"],

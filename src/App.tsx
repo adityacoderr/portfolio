@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks, journey, achievements, type JourneyEntry, type Achievement } from "./data/portfolio";
 import GlobalSearch from "./components/GlobalSearch";
+import { useTheme } from "./context/ThemeContext";
 import type {
   ContentBlock,
   EngineeringNote,
@@ -126,6 +127,30 @@ function estimateReadingTime(sections: { blocks: ContentBlock[] }[]): string {
   return minutes === 1 ? "1 min read" : `${minutes} min read`;
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      type="button"
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      onClick={toggleTheme}
+      className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-panel text-muted hover:border-ink hover:text-ink transition focus:outline-none focus:ring-2 focus:ring-graph/40"
+    >
+      {theme === "dark" ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="5" />
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 function Layout({ children, path }: { children: React.ReactNode; path: string }) {
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -151,6 +176,7 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
             ))}
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
+            <ThemeToggle />
             <button
               type="button"
               aria-label="Open search"
@@ -587,15 +613,6 @@ function HeroSection() {
     <section className="hero relative overflow-hidden">
       {/* Symmetric geometric background — professional / blueprint style */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        {/* faint grid */}
-        <div
-          className="absolute inset-0 opacity-[0.38]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #d8d0c3 1px, transparent 1px), linear-gradient(to bottom, #d8d0c3 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-          }}
-        />
         {/* soft fade to keep text readable */}
         <div className="absolute inset-0 bg-gradient-to-b from-paper/60 via-paper/20 to-paper" />
         <div className="absolute inset-0 bg-gradient-to-r from-paper via-transparent to-paper/70" />

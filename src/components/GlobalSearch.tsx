@@ -435,7 +435,7 @@ export default function GlobalSearch() {
       {desktopOpen && (
         <div className="fixed inset-0 z-40" role="dialog" aria-modal="true" aria-label="Search">
           <div
-            className="absolute inset-0 bg-ink/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
             onClick={() => {
               setDesktopOpen(false);
             }}
