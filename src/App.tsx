@@ -137,7 +137,7 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
         <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4" aria-label="Primary navigation">
           <Link href="/" className="group flex items-center gap-2 font-mono text-sm font-semibold tracking-normal text-ink">
             <span className="h-2 w-2 bg-rust transition group-hover:bg-graph" aria-hidden="true" />
-            aditya.engineering
+            adityapandey
           </Link>
           <div className="hidden items-center gap-1 lg:flex">
             {navItems.map((item) => (
