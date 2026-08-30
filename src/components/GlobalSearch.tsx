@@ -468,12 +468,25 @@ export default function GlobalSearch() {
                 />
               </div>
 
-              <div className="border-t border-line bg-paper px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] text-muted">
-                <span>{hasQuery ? `${results.length} result${results.length === 1 ? "" : "s"} · projects, notes, journey, achievements & about` : `${searchItems.length} searchable items`}</span>
-                <span className="hidden sm:inline">
-                  {hasQuery && results.length > 0 ? "press 1 for 1st · 2 for 2nd · 3 for 3rd … 9 to open · " : ""}
-                  ↵ to open · ESC to close
-                </span>
+              <div className="border-t border-line bg-paper px-4 py-2.5 flex items-center justify-between gap-3">
+                <span className="font-mono text-[11px] leading-none text-muted">{hasQuery ? `${results.length} result${results.length === 1 ? "" : "s"} · projects, notes, journey, achievements & about` : `${searchItems.length} searchable items`}</span>
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                  <span className="hidden sm:inline font-mono text-[11px] text-muted">
+                    {hasQuery && results.length > 0 ? "press 1 for 1st · 2 for 2nd · 3 for 3rd … 9 to open · " : ""}
+                    ↵ to open · ESC to close
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setDesktopOpen(false)}
+                    aria-label="Close search dialog"
+                    className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-panel px-3 font-mono text-xs font-medium text-ink transition hover:border-ink hover:bg-paper focus:outline-none focus:ring-2 focus:ring-graph/20 active:scale-[0.97] lg:hidden"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                    Close
+                  </button>
+                </div>
               </div>
             </div>
             <p className="mt-3 text-center font-mono text-xs text-paper/80">Tip: just start typing anywhere — no need to click</p>
