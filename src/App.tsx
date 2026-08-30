@@ -696,10 +696,136 @@ function ProjectsPage() {
 function ProjectPage({ project }: { project: Project }) {
   const work = getWorkForProject(project.id);
   const relatedNotes = notes.filter((note) => note.relatedProjectId === project.id);
+  const [gcbModalOpen, setGcbModalOpen] = useState(false);
 
   useEffect(() => {
     setPageMeta(project.name, project.shortDescription);
   }, [project]);
+
+  useEffect(() => {
+    if (!gcbModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setGcbModalOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [gcbModalOpen]);
+
+  if (project.id === "gcb") {
+    return (
+      <div className="mx-auto max-w-7xl px-5 py-12 md:py-16 relative">
+        <div className="max-w-3xl relative z-10">
+          <p className="eyebrow">Project</p>
+          <h1 className="page-title">{project.name}</h1>
+          <p className="mt-5 text-lg leading-8 text-muted">{project.longDescription}</p>
+          {project.tagline && (
+            <p className="mt-3 font-mono text-sm text-rust">{project.tagline}</p>
+          )}
+        </div>
+        <div className="hidden lg:block absolute top-20 xl:top-24 right-24 xl:right-32 z-20 select-none">
+          <button
+            type="button"
+            onClick={() => setGcbModalOpen(true)}
+            className="block cursor-zoom-in bg-transparent p-0 border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-graph/40 rounded-md"
+            aria-label="Open GCB preview"
+          >
+            <img
+              src="/gcb.png"
+              alt="GCB - Gully Cricket Board preview, click to expand"
+              loading="lazy"
+              decoding="async"
+              className="h-[440px] xl:h-[480px] w-auto object-contain bg-transparent drop-shadow-[0_8px_24px_rgba(0,0,0,0.12)]"
+              style={{ background: "transparent" }}
+            />
+          </button>
+        </div>
+        {gcbModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+            onClick={() => setGcbModalOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="GCB preview"
+          >
+            <div className="relative max-h-[90vh] max-w-[90vw] flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+              <a
+                href="https://gcb-frontend-henna.vercel.app"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Open GCB live app"
+                className="block cursor-pointer"
+              >
+                <img
+                  src="/gcb.png"
+                  alt="GCB - Gully Cricket Board preview - click to open live app"
+                  className="max-h-[85vh] max-w-[90vw] w-auto h-auto object-contain rounded-md bg-transparent"
+                  style={{ background: "transparent" }}
+                />
+              </a>
+              <p className="mt-3 text-sm text-paper/80 font-mono">Click image to open live app ↗</p>
+              <button
+                type="button"
+                onClick={() => setGcbModalOpen(false)}
+                className="absolute -top-3 -right-3 h-8 w-8 rounded-full bg-paper border border-line text-ink flex items-center justify-center shadow-soft hover:bg-panel focus:outline-none focus:ring-2 focus:ring-graph/40"
+                aria-label="Close preview"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+        <div className="mt-10 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="panel">
+            <dl className="details-list">
+              <div>
+                <dt>Status</dt>
+                <dd>{project.status}</dd>
+              </div>
+              <div>
+                <dt>Technologies</dt>
+                <dd>
+                  {project.technologies.length
+                    ? project.technologies.join(" · ")
+                    : "To be added from verified project material"}
+                </dd>
+              </div>
+              <div>
+                <dt>Pillars</dt>
+                <dd className="flex flex-wrap gap-2">
+                  {project.pillars.map((pillarId) => (
+                    <PillarBadge key={pillarId} id={pillarId} />
+                  ))}
+                </dd>
+              </div>
+              {project.links.length > 0 && (
+                <div>
+                  <dt>Links</dt>
+                  <dd className="flex flex-wrap gap-2">
+                    {project.links.map((link) => (
+                      <a key={link.href} href={link.href} className="tag" rel="noreferrer" target="_blank">
+                        {link.label}
+                      </a>
+                    ))}
+                  </dd>
+                </div>
+              )}
+            </dl>
+          </div>
+          <SubsystemTree project={project} />
+        </div>
+        <div className="mt-10">
+          <h2 className="content-heading">Related technical work</h2>
+          <div className="mt-4">
+            <WorkCards items={work} />
+          </div>
+        </div>
+        <div className="mt-10">
+          <h2 className="content-heading">Related notes</h2>
+          <NoteList notesToShow={relatedNotes} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PageIntro eyebrow="Project" title={project.name} intro={project.longDescription}>
