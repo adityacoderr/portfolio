@@ -312,11 +312,13 @@ function AchievementsSection() {
   return (
     <div id="achievements" className="scroll-mt-24">
       <Section eyebrow="02 / Achievements" title="Achievements & Certifications">
-      <div className="space-y-6">
-        {achievements.map((achievement, index) => (
-          <AchievementCard key={achievement.title} achievement={achievement} index={index} />
-        ))}
-      </div>
+        <div className="mx-auto max-w-4xl">
+          <div className="grid gap-5 sm:grid-cols-2 justify-center" role="list" aria-label="Achievements and certifications">
+            {achievements.map((achievement, index) => (
+              <AchievementCard key={achievement.title} achievement={achievement} index={index} />
+            ))}
+          </div>
+        </div>
       </Section>
     </div>
   );
@@ -324,7 +326,7 @@ function AchievementsSection() {
 
 function AchievementCard({
   achievement,
-  index
+  index: _index
 }: {
   achievement: Achievement;
   index: number;
@@ -334,25 +336,53 @@ function AchievementCard({
       href={contact.linkedin}
       target="_blank"
       rel="noreferrer"
-      className="block relative panel transition duration-200 hover:-translate-y-0.5 hover:border-rust/40 hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/30"
+      title="Click to open — view proof on LinkedIn"
+      className="group flex h-full flex-col items-center text-center panel transition duration-200 hover:-translate-y-1 hover:border-rust/40 hover:shadow-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-graph/30 cursor-pointer"
       role="listitem"
-      aria-label={`${achievement.title} - view proof on LinkedIn`}
+      aria-label={`${achievement.title}${achievement.subtitle ? ` — ${achievement.subtitle}` : ""} — click to open proof on LinkedIn`}
     >
-      <h3 className="font-semibold leading-snug text-lg text-ink">
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-2.5 py-1 font-mono text-[11px] uppercase tracking-wide text-muted group-hover:border-rust/30 group-hover:text-rust transition-colors">
+        {achievement.category === "Achievement" ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+            <path d="M6 13l3 3 7-7" />
+            <path d="M12 3a7 7 0 00-3 13.5V21h6v-4.5A7 7 0 0012 3z" />
+          </svg>
+        ) : (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+            <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 008 9.17a1.65 1.65 0 001-1.51V7a2 2 0 014 0v.66a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 13.5a1.65 1.65 0 001 1.5z" />
+          </svg>
+        )}
+        {achievement.category}
+      </span>
+
+      <h3 className="mt-3 font-semibold leading-snug text-lg text-ink group-hover:text-rust transition-colors">
         {achievement.title}
       </h3>
       {achievement.subtitle && (
-        <p className="mt-1 text-sm text-muted">{achievement.subtitle}</p>
+        <p className="mt-1 text-sm font-medium text-rust/80">{achievement.subtitle}</p>
       )}
-      <p className="mt-2 text-sm leading-6 text-muted">{achievement.description}</p>
-      <span className="mt-3 inline-flex items-center gap-1.5 tag">
-        {achievement.category}
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-          <path d="M7 17L17 7" />
-          <path d="M8 7h9v9" />
-        </svg>
+      <p className="mt-3 text-sm leading-6 text-muted line-clamp-none">{achievement.description}</p>
+
+      <span className="mt-auto flex w-full flex-col items-center gap-2 pt-5">
+        <span className="h-px w-full bg-line group-hover:bg-rust/20 transition-colors" aria-hidden="true" />
+        <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-graph group-hover:text-rust transition-colors">
+          Click to open
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden="true"
+            className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          >
+            <path d="M7 17L17 7" />
+            <path d="M8 7h9v9" />
+          </svg>
+        </span>
       </span>
-      <span className="mt-2 block font-mono text-xs text-graph">Proof on LinkedIn ↗</span>
     </a>
   );
 }
@@ -554,8 +584,59 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 
 function HeroSection() {
   return (
-    <section className="hero">
-      <div className="mx-auto max-w-7xl px-5 py-16 md:py-28">
+    <section className="hero relative overflow-hidden">
+      {/* Symmetric geometric background — professional / blueprint style */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        {/* faint grid */}
+        <div
+          className="absolute inset-0 opacity-[0.38]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #d8d0c3 1px, transparent 1px), linear-gradient(to bottom, #d8d0c3 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+          }}
+        />
+        {/* soft fade to keep text readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/60 via-paper/20 to-paper" />
+        <div className="absolute inset-0 bg-gradient-to-r from-paper via-transparent to-paper/70" />
+
+        {/* centered symmetric geometry — hidden on mobile for clarity */}
+        <div className="absolute left-1/2 top-[52%] hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center justify-center">
+          {/* outer diamond */}
+          <div className="absolute h-[560px] w-[560px] rotate-45 rounded-[36px] border border-line/40" />
+          <div className="absolute h-[500px] w-[500px] rotate-45 rounded-[32px] border border-dashed border-line/30" />
+          {/* middle diamond */}
+          <div className="absolute h-[380px] w-[380px] rotate-45 rounded-[28px] border border-line/35" />
+          {/* concentric circles — perfect symmetry */}
+          <div className="absolute h-[320px] w-[320px] rounded-full border border-line/40" />
+          <div className="absolute h-[240px] w-[240px] rounded-full border border-dashed border-line/25" />
+          <div className="absolute h-[140px] w-[140px] rounded-full border border-rust/15 bg-rust/[0.03]" />
+          <div className="absolute h-[86px] w-[86px] rounded-full bg-panel border border-line/50 shadow-[0_8px_32px_rgba(29,28,25,0.06)]" />
+          {/* crosshair — symmetric axes */}
+          <div className="absolute h-px w-[740px] bg-gradient-to-r from-transparent via-line/50 to-transparent" />
+          <div className="absolute h-[560px] w-px bg-gradient-to-b from-transparent via-line/50 to-transparent" />
+          {/* diagonal axes */}
+          <div className="absolute h-px w-[520px] rotate-45 bg-gradient-to-r from-transparent via-line/20 to-transparent" />
+          <div className="absolute h-px w-[520px] -rotate-45 bg-gradient-to-r from-transparent via-line/20 to-transparent" />
+          {/* corner nodes — symmetric */}
+          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-rust/30 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-moss/30 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-moss/30 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-rust/30 shadow-sm" />
+          {/* cardinal nodes */}
+          <div className="absolute h-2 w-2 -translate-y-[160px] rounded-full bg-rust/25 border border-rust/20" />
+          <div className="absolute h-2 w-2 translate-y-[160px] rounded-full bg-graph/25 border border-graph/20" />
+          <div className="absolute h-2 w-2 -translate-x-[160px] rounded-full bg-moss/25 border border-moss/20" />
+          <div className="absolute h-2 w-2 translate-x-[160px] rounded-full bg-moss/25 border border-moss/20" />
+          {/* center dot */}
+          <div className="absolute h-2.5 w-2.5 rounded-full bg-rust shadow-sm" />
+        </div>
+
+        {/* secondary faint ring for depth — far background */}
+        <div className="absolute left-1/2 top-[52%] hidden h-[780px] w-[780px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-line/20 md:block" />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-28">
         <p className="font-mono text-sm uppercase tracking-[0.16em] text-rust">
           {profile.name} · {profile.course} · {profile.location}
         </p>
@@ -607,7 +688,7 @@ function HomePage() {
 
       <AchievementsSection />
 
-      <Section eyebrow="02 / Projects" title="Featured projects">
+      <Section eyebrow="03 / Projects" title="Featured projects">
         {featured.length > 0 && (
           <div className={`grid gap-4 ${featured.length > 1 ? "lg:grid-cols-2" : ""}`}>
             {featured.map((project) => (
@@ -624,11 +705,11 @@ function HomePage() {
         )}
       </Section>
 
-      <Section eyebrow="03 / Selected work" title="Selected work">
+      <Section eyebrow="04 / Selected work" title="Selected work">
         <WorkCards items={selectedWorks} initial={2} emptyText="No technical work has been published yet." />
       </Section>
 
-      <Section eyebrow="04 / Notes" title="Notes">
+      <Section eyebrow="05 / Notes" title="Notes">
         <NoteList
           notesToShow={[...notes]
             .sort(

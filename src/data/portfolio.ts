@@ -1416,23 +1416,23 @@ export const achievements: Achievement[] = [
     title: "2× National Hackathon Winner",
     category: "Achievement",
     emphasis: true,
-    description: "Winner at two national-level hackathons."
+    description: "Winner at two national-level hackathons — built and shipped working prototypes under tight deadlines, spanning ideation, system design, and end-to-end implementation with a focus on real-world problem solving."
   },
   {
     title: "AWS Cloud Practitioner",
     subtitle: "ICT Academy",
     category: "Certification",
-    description: "AWS cloud fundamentals certification through ICT Academy."
+    description: "Certified in AWS Cloud fundamentals covering EC2, S3, IAM, networking and billing — validating core cloud literacy and hands-on understanding of deploying and managing services on AWS."
   },
   {
     title: "NPTEL Certification",
     subtitle: "Programming in Java",
     category: "Certification",
-    description: "NPTEL certification in Programming in Java."
+    description: "NPTEL certification in Programming in Java — strengthened core OOP, data structures, and problem-solving foundations through rigorous coursework and proctored evaluation."
   },
   {
     title: "ISRO Hackathon Participant",
     category: "Achievement",
-    description: "Participated in an ISRO hackathon."
+    description: "Participated in an ISRO-organized hackathon, collaborating on space-tech problem statements and gaining exposure to large-scale, mission-driven engineering constraints and evaluation."
   }
 ];
