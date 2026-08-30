@@ -79,7 +79,7 @@
   }
 
   .mobile-nav {
-    @apply whitespace-nowrap border border-line bg-panel px-3 py-2 text-sm text-muted transition hover:text-ink;
+    @apply whitespace-nowrap rounded-full border border-line bg-panel px-2.5 py-1 text-xs font-medium text-muted transition hover:text-ink;
   }
 
   .mobile-nav-active {

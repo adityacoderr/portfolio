@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks, journey, achievements, type JourneyEntry, type Achievement } from "./data/portfolio";
+import GlobalSearch from "./components/GlobalSearch";
 import type {
   ContentBlock,
   EngineeringNote,
@@ -149,22 +150,36 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
               </Link>
             ))}
           </div>
-          <div className="flex items-center gap-2">
-            <a className="button-secondary" href={contact.github} rel="noreferrer" target="_blank">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              aria-label="Open search"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-global-search"))}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line bg-panel text-muted hover:border-ink hover:text-ink transition lg:h-auto lg:w-auto lg:px-3 lg:py-2 lg:gap-2"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <span className="hidden lg:inline font-mono text-xs">Search</span>
+              <span className="ml-1 hidden xl:inline rounded bg-paper border border-line px-1.5 py-0.5 font-mono text-[10px] leading-none">type to search</span>
+            </button>
+            <a className="button-secondary !px-3 !py-2 !min-h-10 text-xs sm:text-sm" href={contact.github} rel="noreferrer" target="_blank">
               GitHub
             </a>
-            <a className="button-primary" href={`mailto:${contact.email}`}>
+            <a className="button-primary !px-3 !py-2 !min-h-10 text-xs sm:text-sm" href={`mailto:${contact.email}`}>
               Contact
             </a>
           </div>
         </nav>
-        <div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto px-5 pb-3 lg:hidden">
+        <div className="mx-auto flex max-w-7xl gap-1.5 overflow-x-auto px-5 pb-2 lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href} className={`mobile-nav ${path === item.href ? "mobile-nav-active" : ""}`}>
               {item.label}
             </Link>
           ))}
         </div>
+        <GlobalSearch />
       </header>
       <main id="main">{children}</main>
       <Footer />
@@ -201,7 +216,8 @@ function Footer() {
 
 function JourneyTimeline() {
   return (
-    <Section eyebrow="01 / Journey" title="Engineering Journey">
+    <div id="journey" className="scroll-mt-24">
+      <Section eyebrow="01 / Journey" title="Engineering Journey">
       <div className="relative mt-8" role="list" aria-label="Engineering journey timeline">
         {/* Desktop / Tablet vertical timeline line */}
         <div className="absolute left-[19px] md:left-[23px] top-4 bottom-4 w-px bg-gradient-to-b from-rust via-line to-line hidden sm:block" aria-hidden="true" />
@@ -213,7 +229,8 @@ function JourneyTimeline() {
           <JourneyEndCard />
         </div>
       </div>
-    </Section>
+      </Section>
+    </div>
   );
 }
 
@@ -293,13 +310,15 @@ function JourneyEndCard() {
 
 function AchievementsSection() {
   return (
-    <Section eyebrow="02 / Achievements" title="Achievements & Certifications">
+    <div id="achievements" className="scroll-mt-24">
+      <Section eyebrow="02 / Achievements" title="Achievements & Certifications">
       <div className="space-y-6">
         {achievements.map((achievement, index) => (
           <AchievementCard key={achievement.title} achievement={achievement} index={index} />
         ))}
       </div>
-    </Section>
+      </Section>
+    </div>
   );
 }
 
@@ -311,7 +330,14 @@ function AchievementCard({
   index: number;
 }) {
   return (
-    <article className="relative panel" role="listitem">
+    <a
+      href={contact.linkedin}
+      target="_blank"
+      rel="noreferrer"
+      className="block relative panel transition duration-200 hover:-translate-y-0.5 hover:border-rust/40 hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/30"
+      role="listitem"
+      aria-label={`${achievement.title} - view proof on LinkedIn`}
+    >
       <h3 className="font-semibold leading-snug text-lg text-ink">
         {achievement.title}
       </h3>
@@ -319,8 +345,15 @@ function AchievementCard({
         <p className="mt-1 text-sm text-muted">{achievement.subtitle}</p>
       )}
       <p className="mt-2 text-sm leading-6 text-muted">{achievement.description}</p>
-      <span className="mt-3 inline-block tag">{achievement.category}</span>
-    </article>
+      <span className="mt-3 inline-flex items-center gap-1.5 tag">
+        {achievement.category}
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M7 17L17 7" />
+          <path d="M8 7h9v9" />
+        </svg>
+      </span>
+      <span className="mt-2 block font-mono text-xs text-graph">Proof on LinkedIn ↗</span>
+    </a>
   );
 }
 
