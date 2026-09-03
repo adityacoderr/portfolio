@@ -246,7 +246,7 @@ function Footer() {
 function JourneyTimeline() {
   return (
     <div id="journey" className="scroll-mt-24">
-      <Section eyebrow="01 / Journey" title="Engineering Journey">
+      <Section eyebrow="01 / Journey" title="Engineering Journey" accent="rust">
       <div className="relative mt-8" role="list" aria-label="Engineering journey timeline">
         {/* Desktop / Tablet vertical timeline line */}
         <div className="absolute left-[19px] md:left-[23px] top-4 bottom-4 w-px bg-gradient-to-b from-rust via-line to-line hidden sm:block" aria-hidden="true" />
@@ -340,7 +340,7 @@ function JourneyEndCard() {
 function AchievementsSection() {
   return (
     <div id="achievements" className="scroll-mt-24">
-      <Section eyebrow="02 / Achievements" title="Achievements & Certifications">
+      <Section eyebrow="02 / Achievements" title="Achievements & Certifications" accent="moss">
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-5 sm:grid-cols-2 justify-center" role="list" aria-label="Achievements and certifications">
             {achievements.map((achievement, index) => (
@@ -420,19 +420,39 @@ function Section({
   eyebrow,
   title,
   intro,
+  accent = "rust",
   children
 }: {
   eyebrow?: string;
   title: string;
   intro?: string;
+  accent?: "rust" | "moss" | "graph" | "steel";
   children: React.ReactNode;
 }) {
+  const accentDot: Record<string, string> = {
+    rust: "bg-rust",
+    moss: "bg-moss",
+    graph: "bg-graph",
+    steel: "bg-steel",
+  };
   return (
-    <section className="section">
+    <section className="section relative overflow-hidden">
+      {/* subtle colourful wash — makes faded sections pop */}
+      <div
+        className={`pointer-events-none absolute inset-0 -z-10 opacity-[0.035] ${
+          accent === "rust" ? "bg-gradient-to-br from-rust via-rust/40 to-transparent" : ""
+        } ${accent === "moss" ? "bg-gradient-to-br from-moss via-moss/40 to-transparent" : ""} ${
+          accent === "graph" ? "bg-gradient-to-br from-graph via-graph/40 to-transparent" : ""
+        } ${accent === "steel" ? "bg-gradient-to-br from-steel via-steel/30 to-transparent" : ""}`}
+        aria-hidden="true"
+      />
       <div className="section-heading">
         {eyebrow && (
           <div className="mb-3 flex items-center gap-4">
-            <span className="section-label">{eyebrow}</span>
+            <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-rust">
+              <span className={`h-1.5 w-1.5 rounded-full ${accentDot[accent]}`} aria-hidden="true" />
+              {eyebrow}
+            </span>
             <span className="section-rule" aria-hidden="true" />
           </div>
         )}
@@ -708,7 +728,7 @@ function HomePage() {
 
       <AchievementsSection />
 
-      <Section eyebrow="03 / Projects" title="Featured projects">
+      <Section eyebrow="03 / Projects" title="Featured projects" accent="graph">
         {featured.length > 0 && (
           <div className={`grid gap-4 ${featured.length > 1 ? "lg:grid-cols-2" : ""}`}>
             {featured.map((project) => (
@@ -727,11 +747,11 @@ function HomePage() {
 
       <AnalyticsPreviewSection />
 
-      <Section eyebrow="05 / Selected work" title="Selected work">
+      <Section eyebrow="05 / Selected work" title="Selected work" accent="steel">
         <WorkCards items={selectedWorks} initial={2} emptyText="No technical work has been published yet." />
       </Section>
 
-      <Section eyebrow="06 / Notes" title="Notes">
+      <Section eyebrow="06 / Notes" title="Notes" accent="moss">
         <NoteList
           notesToShow={[...notes]
             .sort(
@@ -1397,10 +1417,14 @@ function AboutPage() {
 function AnalyticsPreviewSection() {
   if (!analyticsConfig.github.enabled && !analyticsConfig.leetcode.enabled) return null;
   return (
-    <section id="pulse" className="section scroll-mt-24">
+    <section id="pulse" className="section scroll-mt-24 relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.035] bg-gradient-to-br from-graph via-graph/40 to-transparent" aria-hidden="true" />
       <div className="section-heading">
         <div className="mb-3 flex items-center gap-4">
-          <span className="section-label">04 / Pulse</span>
+          <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-rust">
+            <span className="h-1.5 w-1.5 rounded-full bg-graph" aria-hidden="true" />
+            04 / Pulse
+          </span>
           <span className="section-rule" aria-hidden="true" />
         </div>
         <div className="flex flex-wrap items-baseline justify-between gap-3">

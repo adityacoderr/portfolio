@@ -169,7 +169,7 @@
   }
 
   .section-rule {
-    @apply h-px flex-1 bg-line;
+    @apply h-0.5 flex-1 bg-gradient-to-r from-rust via-moss to-graph opacity-60;
   }
 
   .eyebrow {
@@ -181,12 +181,21 @@
   }
 
   .panel {
-    @apply rounded-md border border-line bg-panel p-5 md:p-6;
+    @apply relative overflow-hidden rounded-md border border-line bg-panel p-5 md:p-6;
+  }
+
+  .panel::before {
+    @apply absolute inset-x-0 top-0 h-0.5 content-[''] bg-gradient-to-r from-rust via-moss to-graph opacity-70;
   }
 
   .item-card,
   .pillar-panel {
-    @apply rounded-md border border-line bg-panel p-5 transition duration-200 hover:-translate-y-0.5 hover:border-muted hover:shadow-soft md:p-6;
+    @apply relative overflow-hidden rounded-md border border-line bg-panel p-5 transition duration-200 hover:-translate-y-0.5 hover:border-rust/30 hover:shadow-soft md:p-6;
+  }
+
+  .item-card::before,
+  .pillar-panel::before {
+    @apply absolute inset-x-0 top-0 h-0.5 content-[''] bg-gradient-to-r from-rust via-moss to-graph opacity-60 transition-opacity hover:opacity-100;
   }
 
   .item-card h3,
