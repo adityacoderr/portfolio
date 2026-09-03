@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks, journey, achievements, type JourneyEntry, type Achievement } from "./data/portfolio";
+import { analyticsConfig } from "./data/analytics";
 import GlobalSearch from "./components/GlobalSearch";
+import GitHubAnalytics from "./components/GitHubAnalytics";
+import LeetCodeAnalytics from "./components/LeetCodeAnalytics";
 import { useTheme } from "./context/ThemeContext";
 import type {
   ContentBlock,
@@ -722,11 +725,13 @@ function HomePage() {
         )}
       </Section>
 
-      <Section eyebrow="04 / Selected work" title="Selected work">
+      <AnalyticsPreviewSection />
+
+      <Section eyebrow="05 / Selected work" title="Selected work">
         <WorkCards items={selectedWorks} initial={2} emptyText="No technical work has been published yet." />
       </Section>
 
-      <Section eyebrow="05 / Notes" title="Notes">
+      <Section eyebrow="06 / Notes" title="Notes">
         <NoteList
           notesToShow={[...notes]
             .sort(
@@ -1386,6 +1391,50 @@ function AboutPage() {
 
       <ContactBand />
     </>
+  );
+}
+
+function AnalyticsPreviewSection() {
+  if (!analyticsConfig.github.enabled && !analyticsConfig.leetcode.enabled) return null;
+  return (
+    <section id="pulse" className="section scroll-mt-24">
+      <div className="section-heading">
+        <div className="mb-3 flex items-center gap-4">
+          <span className="section-label">04 / Pulse</span>
+          <span className="section-rule" aria-hidden="true" />
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-3">
+          <h2>Realtime progress</h2>
+          <span className="font-mono text-xs text-muted hidden sm:inline">~/pulse.json · auto-refresh on load · <a href={`https://github.com/${analyticsConfig.github.username}`} target="_blank" rel="noreferrer" className="underline decoration-line hover:text-ink">github</a> · <a href={`https://leetcode.com/u/${analyticsConfig.leetcode.username}/`} target="_blank" rel="noreferrer" className="underline decoration-line hover:text-ink">leetcode</a></span>
+        </div>
+        <p className="font-mono text-xs text-muted mt-1 sm:hidden">github:{analyticsConfig.github.username} · leetcode:{analyticsConfig.leetcode.username}</p>
+      </div>
+
+      {/* Bento / terminal style unified card */}
+      <div className="mt-6 overflow-hidden rounded-xl border border-line bg-panel shadow-soft">
+        {/* window bar */}
+        <div className="flex items-center justify-between gap-3 border-b border-line bg-paper px-4 py-2.5">
+          <div className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-rust/80" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#eab308]/80" aria-hidden="true" />
+            <span className="h-2.5 w-2.5 rounded-full bg-moss/80" aria-hidden="true" />
+          </div>
+          <span className="font-mono text-[11px] tracking-wide text-muted">adityacoderr@pulse — live</span>
+          <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[11px] text-moss">
+            <span className="h-1.5 w-1.5 rounded-full bg-moss animate-pulse" aria-hidden="true" /> live
+          </span>
+        </div>
+
+        <div className="grid gap-0 lg:grid-cols-2">
+          <div className="p-3 sm:p-4 lg:border-r lg:border-line">
+            {analyticsConfig.github.enabled && <GitHubAnalytics />}
+          </div>
+          <div className="border-t border-line p-3 sm:p-4 lg:border-t-0">
+            {analyticsConfig.leetcode.enabled && <LeetCodeAnalytics />}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

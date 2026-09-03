@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { achievements, contact, journey, notes, projects, technicalWorks } from "../data/portfolio";
+import { analyticsConfig } from "../data/analytics";
 
 function navigateTo(href: string) {
   window.history.pushState({}, "", href);
@@ -116,6 +117,39 @@ const searchItems: SearchItem[] = [
     status: "Page",
     category: "About",
   },
+  {
+    id: "external-github",
+    kind: "page" as const,
+    title: "GitHub — adityacoderr",
+    description: "Open GitHub profile (github.com/adityacoderr) in new tab",
+    tags: ["github", "Github", "GITHUB", "git"],
+    displayTags: ["github", "external"],
+    href: contact.github,
+    status: "External",
+    category: "GitHub",
+  },
+  {
+    id: "external-leetcode",
+    kind: "page" as const,
+    title: "LeetCode — adityacoderrr",
+    description: "Open LeetCode profile (leetcode.com/u/adityacoderrr) in new tab",
+    tags: ["leetcode", "Leetcode", "LEETCODE", "leet", "lc"],
+    displayTags: ["leetcode", "external"],
+    href: `https://leetcode.com/u/${analyticsConfig.leetcode.username}/`,
+    status: "External",
+    category: "LeetCode",
+  },
+  {
+    id: "external-linkedin",
+    kind: "page" as const,
+    title: "LinkedIn — Aditya Pandey",
+    description: "Open LinkedIn profile in new tab",
+    tags: ["linkedin", "Linkedin", "LINKEDIN", "linked"],
+    displayTags: ["linkedin", "external"],
+    href: contact.linkedin,
+    status: "External",
+    category: "LinkedIn",
+  },
 ];
 
 const allUniqueTags = Array.from(new Set(searchItems.flatMap((i) => i.tags))).sort((a, b) =>
@@ -177,7 +211,14 @@ function scoreItem(item: SearchItem, q: string): number {
     certifications: ["achievement"],
     about: ["page"],
     philosophy: ["page"],
+    analytics: ["page"],
+    github: ["page"],
+    leetcode: ["page"],
+    dsa: ["page"],
   };
+  // External profile shortcuts — always top for exact github/leetcode/linkedin
+  if (item.id.startsWith("external-") && tags.some((t) => t === normalizedQ)) return 110;
+
   if (kindAliases[normalizedQ]?.includes(item.kind)) return 95;
 
   // Highest priority: exact tag match
