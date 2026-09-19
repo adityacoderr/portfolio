@@ -1360,7 +1360,7 @@ export const profile = {
 };
 
 export const contact = {
-  email: "adityacoderr@example.com",
+  email: "heyadityapandey@gmail.com",
   github: "https://github.com/adityacoderr",
   linkedin: "https://www.linkedin.com/in/aditya-pandey-037872262"
 };

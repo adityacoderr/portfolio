@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-paper: #f7f4ee;
-    --color-paper-rgb: 247 244 238;
-    --color-ink: #1d1c19;
-    --color-ink-rgb: 29 28 25;
-    --color-muted: #6d675f;
-    --color-muted-rgb: 109 103 95;
-    --color-line: #d8d0c3;
-    --color-line-rgb: 216 208 195;
-    --color-panel: #fffdf8;
-    --color-panel-rgb: 255 253 248;
-    --color-steel: #334155;
-    --color-steel-rgb: 51 65 85;
-    --color-moss: #3f5d50;
+    :root {
+    --color-paper: #FFFFFF;
+    --color-paper-rgb: 255 255 255;
+    --color-ink: #1A1A1A;
+    --color-ink-rgb: 26 26 26;
+    --color-muted: #6B7280;
+    --color-muted-rgb: 107 114 128;
+    --color-line: #E2E8F0;
+    --color-line-rgb: 226 232 240;
+    --color-panel: #FBFBFC;
+    --color-panel-rgb: 251 251 252;
+    --color-steel: #4A5568;
+    --color-steel-rgb: 74 85 104;
+    --color-moss: #3F5D50;
     --color-moss-rgb: 63 93 80;
-    --color-rust: #8a4b33;
-    --color-rust-rgb: 138 75 51;
-    --color-graph: #245c73;
+    --color-rust: #B7410E;
+    --color-rust-rgb: 183 65 14;
+    --color-graph: #245C73;
     --color-graph-rgb: 36 92 115;
     color-scheme: light;
     font-synthesis: none;
@@ -29,24 +29,24 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  html.dark {
-    --color-paper: #0f1113;
-    --color-paper-rgb: 15 17 19;
-    --color-ink: #e8e6dd;
+    html.dark {
+    --color-paper: #000000;
+    --color-paper-rgb: 0 0 0;
+    --color-ink: #E8E6DD;
     --color-ink-rgb: 232 230 221;
-    --color-muted: #a8a29a;
+    --color-muted: #A8A29A;
     --color-muted-rgb: 168 162 154;
-    --color-line: #2b2e33;
-    --color-line-rgb: 43 46 51;
-    --color-panel: #1a1d1f;
-    --color-panel-rgb: 26 29 31;
-    --color-steel: #94a3b8;
+    --color-line: #1A1A1A;
+    --color-line-rgb: 26 26 26;
+    --color-panel: #0A0A0A;
+    --color-panel-rgb: 10 10 10;
+    --color-steel: #94A3B8;
     --color-steel-rgb: 148 163 184;
-    --color-moss: #6da08f;
+    --color-moss: #6DA08F;
     --color-moss-rgb: 109 160 143;
-    --color-rust: #d47a5a;
+    --color-rust: #D47A5A;
     --color-rust-rgb: 212 122 90;
-    --color-graph: #6bb8d6;
+    --color-graph: #6BB8D6;
     --color-graph-rgb: 107 184 214;
     color-scheme: dark;
   }
@@ -56,7 +56,35 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    scroll-padding-top: 88px;
+  }
+
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  @keyframes wave {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
   }
 
   body {
@@ -112,7 +140,7 @@
   }
 
   .nav-link {
-    @apply relative rounded-sm px-3 py-2 text-sm text-muted transition hover:text-ink focus:outline-none focus:ring-2 focus:ring-graph/40;
+    @apply relative rounded-md px-3 py-2 text-sm text-muted transition hover:text-ink focus:outline-none focus:ring-2 focus:ring-graph/40;
   }
 
   .nav-link-active {
@@ -120,11 +148,11 @@
   }
 
   .nav-link-active::after {
-    @apply absolute inset-x-3 -bottom-0.5 h-0.5 content-[''] bg-rust;
+    @apply absolute inset-x-3 -bottom-0.5 h-0.5 content-[''] bg-steel;
   }
 
   .mobile-nav {
-    @apply whitespace-nowrap rounded-full border border-line bg-panel px-2.5 py-1 text-xs font-medium text-muted transition hover:text-ink;
+    @apply whitespace-nowrap rounded-md border border-line/40 bg-panel px-2.5 py-1 text-xs font-medium text-muted transition hover:text-ink;
   }
 
   .mobile-nav-active {
@@ -132,11 +160,11 @@
   }
 
   .button-primary {
-    @apply inline-flex min-h-10 items-center justify-center rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper transition hover:-translate-y-0.5 hover:bg-steel hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/40;
+    @apply inline-flex min-h-10 items-center justify-center rounded-md bg-ink px-4 py-2 text-sm font-medium text-paper transition  hover:bg-steel hover:border-steel/50 focus:outline-none focus:ring-2 focus:ring-graph/40;
   }
 
   .button-secondary {
-    @apply inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-panel px-4 py-2 text-sm font-medium text-ink transition hover:-translate-y-0.5 hover:border-ink hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-graph/40;
+    @apply inline-flex min-h-10 items-center justify-center rounded-md border border-line/40 bg-panel px-4 py-2 text-sm font-medium text-ink transition  hover:border-ink hover:border-steel/50 focus:outline-none focus:ring-2 focus:ring-graph/40;
   }
 
   .hero {
@@ -161,7 +189,7 @@
   }
 
   .section-heading p:not(.eyebrow) {
-    @apply mt-4 max-w-2xl text-base leading-7 text-muted;
+    @apply mt-4 max-w-2xl text-base leading-loose text-muted;
   }
 
   .section-label {
@@ -169,7 +197,7 @@
   }
 
   .section-rule {
-    @apply h-0.5 flex-1 bg-gradient-to-r from-rust via-moss to-graph opacity-60;
+    @apply h-0.5 flex-1 bg-rust opacity-60;
   }
 
   .eyebrow {
@@ -180,23 +208,22 @@
     @apply h-1.5 w-1.5 flex-none content-[''] bg-rust;
   }
 
-  .panel {
-    @apply relative overflow-hidden rounded-md border border-line bg-panel p-5 md:p-6;
-  }
+  
+.panel {
+  @apply relative overflow-hidden rounded-xl border border-line/40 bg-panel p-6 transition-all duration-300 ease-out hover:border-steel/50 md:p-8;
+}
 
-  .panel::before {
-    @apply absolute inset-x-0 top-0 h-0.5 content-[''] bg-gradient-to-r from-rust via-moss to-graph opacity-70;
-  }
 
-  .item-card,
-  .pillar-panel {
-    @apply relative overflow-hidden rounded-md border border-line bg-panel p-5 transition duration-200 hover:-translate-y-0.5 hover:border-rust/30 hover:shadow-soft md:p-6;
-  }
+  .panel::before { display: none; }
 
-  .item-card::before,
-  .pillar-panel::before {
-    @apply absolute inset-x-0 top-0 h-0.5 content-[''] bg-gradient-to-r from-rust via-moss to-graph opacity-60 transition-opacity hover:opacity-100;
-  }
+  
+.item-card,
+.pillar-panel {
+  @apply relative overflow-hidden rounded-xl border border-line/40 bg-panel p-6 transition-all duration-300 ease-out hover:border-steel/50 hover:bg-paper/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] md:p-8;
+}
+
+
+  .item-card::before, .pillar-panel::before { display: none; }
 
   .item-card h3,
   .pillar-panel h3 {
@@ -210,19 +237,19 @@
 
   .item-card p:not(:first-child),
   .pillar-panel p:not(:first-child) {
-    @apply mt-3 text-sm leading-6 text-muted;
+    @apply mt-3 text-sm leading-relaxed text-muted;
   }
 
   .tag {
-    @apply inline-flex min-h-8 items-center border border-line bg-paper px-2.5 py-1 font-mono text-xs text-muted transition hover:border-ink hover:text-ink;
+    @apply inline-flex min-h-8 items-center border border-line/40 bg-paper px-2.5 py-1 font-mono text-xs text-muted transition hover:border-ink hover:text-ink;
   }
 
   .chip {
-    @apply inline-flex min-h-8 items-center border border-line bg-paper px-3 py-1 font-mono text-xs text-muted;
+    @apply inline-flex min-h-8 items-center border border-line/40 bg-paper px-3 py-1 font-mono text-xs text-muted;
   }
 
   .diagram {
-    @apply border border-line bg-panel p-5 shadow-soft;
+    @apply border border-line/40 bg-panel p-5 border border-line/40;
   }
 
   .diagram-row {
@@ -238,7 +265,7 @@
   }
 
   .diagram-arrow {
-    @apply text-right font-mono text-[10px] uppercase text-rust;
+    @apply text-right font-mono text-[10px] uppercase text-steel;
   }
 
   .details-list {
@@ -250,7 +277,7 @@
   }
 
   .details-list dd {
-    @apply mt-2 text-sm leading-6 text-ink;
+    @apply mt-2 text-sm leading-relaxed text-ink;
   }
 
   .content-heading {
@@ -258,7 +285,7 @@
   }
 
   .content-heading::before {
-    @apply h-3.5 w-1 flex-none content-[''] rounded-sm bg-rust;
+    @apply h-3.5 w-1 flex-none content-[''] rounded-md bg-rust;
   }
 
   .breadcrumb {
@@ -298,11 +325,11 @@
   }
 
   .content-list li {
-    @apply flex gap-3 text-base leading-7 text-muted;
+    @apply flex gap-3 text-base leading-loose text-muted;
   }
 
   .content-list li::before {
-    @apply mt-[0.65em] h-1.5 w-1.5 flex-none content-[''] bg-rust;
+    @apply mt-[0.65em] h-1.5 w-1.5 flex-none content-[''] bg-steel;
   }
 
   .code-block-wrap {
@@ -310,7 +337,7 @@
   }
 
   .code-label {
-    @apply mb-2 font-mono text-xs uppercase text-rust;
+    @apply mb-2 font-mono text-xs uppercase text-steel;
   }
 
   .code-block {
@@ -318,7 +345,7 @@
   }
 
   html.dark .code-block {
-    @apply border border-line;
+    @apply border border-line/40;
   }
 
   .code-block code {
@@ -326,11 +353,11 @@
   }
 
   .math-block {
-    @apply max-w-3xl overflow-x-auto rounded-md border border-line bg-panel p-4 text-center font-mono text-sm text-ink;
+    @apply max-w-3xl overflow-x-auto rounded-md border border-line/40 bg-panel p-4 text-center font-mono text-sm text-ink;
   }
 
   .callout {
-    @apply max-w-3xl rounded-r-md border-l-2 border-rust bg-panel p-4 text-sm leading-6 text-muted;
+    @apply max-w-3xl rounded-r-md border-l-2 border-steel bg-panel p-4 text-sm leading-relaxed text-muted;
   }
 
   .callout-info {
@@ -346,15 +373,15 @@
   }
 
   .flow-node {
-    @apply border border-line bg-panel px-3 py-2 font-mono text-xs text-ink;
+    @apply border border-line/40 bg-panel px-3 py-2 font-mono text-xs text-ink;
   }
 
   .flow-arrow {
-    @apply font-mono text-xs text-rust;
+    @apply font-mono text-xs text-steel;
   }
 
   .featured-panel {
-    @apply relative flex flex-col overflow-hidden rounded-md border border-ink bg-panel p-5 shadow-[0_2px_10px_rgba(29,28,25,0.06)] md:p-8;
+    @apply relative flex flex-col overflow-hidden rounded-md border border-ink bg-panel p-5 border border-line/20 md:p-8;
   }
 
   html.dark .featured-panel {
@@ -362,7 +389,7 @@
   }
 
   .featured-panel::before {
-    @apply absolute inset-x-0 top-0 h-1 content-[''] bg-gradient-to-r from-rust via-moss to-graph;
+    @apply absolute inset-x-0 top-0 h-1 content-[''] bg-steel;
   }
 
   .featured-panel h3 {
@@ -374,19 +401,19 @@
   }
 
   .featured-panel .featured-tagline {
-    @apply mt-1 font-mono text-sm text-rust;
+    @apply mt-1 font-mono text-sm text-steel;
   }
 
   .featured-panel p:not(.featured-tagline):not(:first-child) {
-    @apply mt-3 text-base leading-7 text-muted;
+    @apply mt-3 text-base leading-loose text-muted;
   }
 
   .empty-state {
-    @apply mt-4 border border-dashed border-line bg-panel p-5 text-sm leading-6 text-muted;
+    @apply mt-4 border border-dashed border-line bg-panel p-5 text-sm leading-relaxed text-muted;
   }
 
   .about-statement {
-    @apply max-w-3xl border-l-2 border-rust bg-panel p-6 md:p-8;
+    @apply max-w-3xl border-l-2 border-steel bg-panel p-6 md:p-8;
   }
 
   .about-statement p {

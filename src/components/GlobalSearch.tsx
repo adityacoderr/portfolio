@@ -1,12 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { achievements, contact, journey, notes, projects, technicalWorks } from "../data/portfolio";
 import { analyticsConfig } from "../data/analytics";
-
-function navigateTo(href: string) {
-  window.history.pushState({}, "", href);
-  window.scrollTo({ top: 0 });
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
+import { navigateTo } from "../lib/scroll";
 
 type SearchItem = {
   id: string;
@@ -372,13 +367,6 @@ export default function GlobalSearch() {
           setQuery("");
           if (href.startsWith("http")) {
             window.open(href, "_blank", "noopener,noreferrer");
-          } else if (href.includes("#")) {
-            const [, hash] = href.split("#");
-            navigateTo(href);
-            setTimeout(() => {
-              const el = document.getElementById(hash);
-              if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-            }, 100);
           } else {
             navigateTo(href);
           }
@@ -464,19 +452,7 @@ export default function GlobalSearch() {
       window.open(href, "_blank", "noopener,noreferrer");
       return;
     }
-    if (href.includes("#")) {
-      const [path, hash] = href.split("#");
-      navigateTo(href);
-      setTimeout(() => {
-        const el = document.getElementById(hash);
-        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-      if (path && window.location.pathname !== path) {
-        // already handled by navigateTo
-      }
-    } else {
-      navigateTo(href);
-    }
+    navigateTo(href);
   };
 
   const handleTagClick = (tag: string) => {
@@ -528,7 +504,7 @@ export default function GlobalSearch() {
                 )}
               </div>
 
-              <div className="max-h-[62vh] lg:max-h-[58vh] overflow-auto">
+              <div className="max-h-[62vh] lg:max-h-[58vh] overflow-auto" data-lenis-prevent>
                 <SearchResultsList
                   query={normalized}
                   rawQuery={query}

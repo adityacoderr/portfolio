@@ -1,4 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { navigateTo, initSmoothScroll } from "./lib/scroll";
 import { contact, notes, pillars, profile, projects, stackGroups, technicalWorks, journey, achievements, type JourneyEntry, type Achievement } from "./data/portfolio";
 import { analyticsConfig } from "./data/analytics";
 import GlobalSearch from "./components/GlobalSearch";
@@ -25,12 +28,6 @@ const navItems = [
   { label: "About", href: "/about" }
 ];
 
-function navigateTo(href: string) {
-  window.history.pushState({}, "", href);
-  window.scrollTo({ top: 0 });
-  window.dispatchEvent(new PopStateEvent("popstate"));
-}
-
 function usePathname() {
   const [pathname, setPathname] = useState(window.location.pathname);
 
@@ -49,7 +46,7 @@ function Link({
   className = ""
 }: {
   href: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
 }) {
   return (
@@ -161,11 +158,18 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
         Skip to content
       </a>
       <header className="sticky top-0 z-20 border-b border-line/80 bg-paper/94 backdrop-blur">
-        <div className="h-1 w-full bg-gradient-to-r from-rust via-moss to-graph" aria-hidden="true" />
+<div className="hidden md:block h-1 w-full bg-gradient-to-r from-rust via-moss to-graph" aria-hidden="true" />
         <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4" aria-label="Primary navigation">
           <Link href="/" className="group flex items-center gap-2 font-mono text-sm font-semibold tracking-normal text-ink">
-            <span className="h-2 w-2 bg-rust transition group-hover:bg-graph" aria-hidden="true" />
-            adityapandey
+            <span className="relative flex h-2 w-2" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full rounded-full border border-emerald-400/80 opacity-70 animate-[wave_2s_ease-out_infinite]" />
+              <span className="absolute inline-flex h-full w-full rounded-full border border-emerald-400/60 opacity-50 animate-[wave_2s_ease-out_infinite_0.66s]" />
+              <span className="absolute inline-flex h-full w-full rounded-full border border-emerald-400/40 opacity-30 animate-[wave_2s_ease-out_infinite_1.33s]" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-gradient-to-br from-emerald-300 via-emerald-500 to-emerald-700 shadow-[0_0_8px_rgba(16,185,129,0.75)]" />
+            </span>
+            <span className="transition group-hover:text-graph">
+              adityapandey
+            </span>
           </Link>
           <div className="hidden items-center gap-1 lg:flex">
             {navItems.map((item) => (
@@ -219,7 +223,7 @@ function Layout({ children, path }: { children: React.ReactNode; path: string })
 function Footer() {
   return (
     <footer className="bg-panel">
-      <div className="h-1 w-full bg-gradient-to-r from-rust via-moss to-graph" aria-hidden="true" />
+      <div className="hidden md:block h-1 w-full bg-gradient-to-r from-rust via-moss to-graph" aria-hidden="true" />
       <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 md:grid-cols-[1.4fr_1fr]">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.16em] text-rust">Engineering Portfolio</p>
@@ -237,7 +241,6 @@ function Footer() {
       </div>
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 border-t border-line px-5 py-4 font-mono text-xs text-muted">
         <span>© {new Date().getFullYear()} {profile.name}</span>
-        <span>Built as a technical notebook · no fabricated metrics</span>
       </div>
     </footer>
   );
@@ -245,7 +248,7 @@ function Footer() {
 
 function JourneyTimeline() {
   return (
-    <div id="journey" className="scroll-mt-24">
+    <div id="journey" className="scroll-mt-24" data-reveal>
       <Section eyebrow="01 / Journey" title="Engineering Journey" accent="rust">
       <div className="relative mt-8" role="list" aria-label="Engineering journey timeline">
         {/* Desktop / Tablet vertical timeline line */}
@@ -339,8 +342,8 @@ function JourneyEndCard() {
 
 function AchievementsSection() {
   return (
-    <div id="achievements" className="scroll-mt-24">
-      <Section eyebrow="02 / Achievements" title="Achievements & Certifications" accent="moss">
+    <div id="achievements" className="scroll-mt-24" data-reveal>
+      <Section eyebrow="02 / Achievements" title="Achievements & Certifications" accent="rust">
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-5 sm:grid-cols-2 justify-center" role="list" aria-label="Achievements and certifications">
             {achievements.map((achievement, index) => (
@@ -587,11 +590,12 @@ function ProjectCard({ project }: { project: Project }) {
       <p className="mt-4 font-mono text-xs text-muted">
         {subsystemCount} subsystem{subsystemCount === 1 ? "" : "s"} · {workCount} technical work{workCount === 1 ? "" : "s"}
       </p>
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="relative z-20 mt-5 flex flex-wrap gap-2">
         {project.pillars.map((pillarId) => (
           <PillarBadge key={pillarId} id={pillarId} />
         ))}
       </div>
+      <Link href={`/projects/${project.id}`} className="absolute inset-0 z-10" aria-label={`Open ${project.name}`} />
     </article>
   );
 }
@@ -632,48 +636,78 @@ function NoteCard({ note }: { note: EngineeringNote }) {
 }
 
 function HeroSection() {
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const resumeMenuRef = useRef<HTMLDivElement>(null);
+  const resumeWrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!resumeOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setResumeOpen(false);
+    };
+    const onPointer = (e: MouseEvent) => {
+      if (resumeWrapRef.current && !resumeWrapRef.current.contains(e.target as Node)) setResumeOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onPointer);
+    };
+  }, [resumeOpen]);
+
+  useEffect(() => {
+    if (resumeOpen && resumeMenuRef.current) {
+      gsap.fromTo(
+        resumeMenuRef.current,
+        { opacity: 0, y: 16, scale: 0.99 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.3, ease: "power2.out" }
+      );
+    }
+  }, [resumeOpen]);
+
   return (
     <section className="hero relative overflow-hidden">
       {/* Symmetric geometric background — professional / blueprint style */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <div aria-hidden="true" className="hero-bg pointer-events-none absolute inset-0">
         {/* soft fade to keep text readable */}
-        <div className="absolute inset-0 bg-gradient-to-b from-paper/60 via-paper/20 to-paper" />
-        <div className="absolute inset-0 bg-gradient-to-r from-paper via-transparent to-paper/70" />
+        <div className="absolute inset-0 bg-gradient-to-b from-paper/40 via-paper/10 to-paper/60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-paper/60 via-transparent to-paper/40" />
 
-        {/* centered symmetric geometry — hidden on mobile for clarity */}
-        <div className="absolute left-1/2 top-[52%] hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center justify-center">
+        {/* centered symmetric geometry */}
+        <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center scale-[0.45] sm:scale-[0.6] md:top-[52%] md:scale-100">
           {/* outer diamond */}
-          <div className="absolute h-[560px] w-[560px] rotate-45 rounded-[36px] border border-line/40" />
-          <div className="absolute h-[500px] w-[500px] rotate-45 rounded-[32px] border border-dashed border-line/30" />
+          <div className="absolute h-[560px] w-[560px] rotate-45 rounded-[36px] border border-ink/20" />
+          <div className="absolute h-[500px] w-[500px] rotate-45 rounded-[32px] border border-dashed border-ink/15" />
           {/* middle diamond */}
-          <div className="absolute h-[380px] w-[380px] rotate-45 rounded-[28px] border border-line/35" />
+          <div className="absolute h-[380px] w-[380px] rotate-45 rounded-[28px] border border-line/55" />
           {/* concentric circles — perfect symmetry */}
-          <div className="absolute h-[320px] w-[320px] rounded-full border border-line/40" />
-          <div className="absolute h-[240px] w-[240px] rounded-full border border-dashed border-line/25" />
-          <div className="absolute h-[140px] w-[140px] rounded-full border border-rust/15 bg-rust/[0.03]" />
-          <div className="absolute h-[86px] w-[86px] rounded-full bg-panel border border-line/50 shadow-[0_8px_32px_rgba(29,28,25,0.06)]" />
+          <div className="absolute h-[320px] w-[320px] rounded-full border border-line/60" />
+          <div className="absolute h-[240px] w-[240px] rounded-full border border-dashed border-line/40" />
+          <div className="absolute h-[140px] w-[140px] rounded-full border border-rust/30 bg-rust/[0.06]" />
+          <div className="absolute h-[86px] w-[86px] rounded-full bg-panel border border-line/70 shadow-[0_8px_32px_rgba(29,28,25,0.06)]" />
           {/* crosshair — symmetric axes */}
-          <div className="absolute h-px w-[740px] bg-gradient-to-r from-transparent via-line/50 to-transparent" />
-          <div className="absolute h-[560px] w-px bg-gradient-to-b from-transparent via-line/50 to-transparent" />
+          <div className="absolute h-px w-[740px] bg-gradient-to-r from-transparent via-ink/45 to-transparent" />
+          <div className="absolute h-[560px] w-px bg-gradient-to-b from-transparent via-ink/45 to-transparent" />
           {/* diagonal axes */}
-          <div className="absolute h-px w-[520px] rotate-45 bg-gradient-to-r from-transparent via-line/20 to-transparent" />
-          <div className="absolute h-px w-[520px] -rotate-45 bg-gradient-to-r from-transparent via-line/20 to-transparent" />
+          <div className="absolute h-px w-[520px] rotate-45 bg-gradient-to-r from-transparent via-ink/35 to-transparent" />
+          <div className="absolute h-px w-[520px] -rotate-45 bg-gradient-to-r from-transparent via-ink/35 to-transparent" />
           {/* corner nodes — symmetric */}
-          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-rust/30 shadow-sm" />
-          <div className="absolute h-2.5 w-2.5 translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-moss/30 shadow-sm" />
-          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-moss/30 shadow-sm" />
-          <div className="absolute h-2.5 w-2.5 translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-rust/30 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-rust/45 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 translate-x-[190px] -translate-y-[190px] rotate-45 bg-panel border border-moss/45 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 -translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-moss/45 shadow-sm" />
+          <div className="absolute h-2.5 w-2.5 translate-x-[190px] translate-y-[190px] rotate-45 bg-panel border border-rust/45 shadow-sm" />
           {/* cardinal nodes */}
-          <div className="absolute h-2 w-2 -translate-y-[160px] rounded-full bg-rust/25 border border-rust/20" />
-          <div className="absolute h-2 w-2 translate-y-[160px] rounded-full bg-graph/25 border border-graph/20" />
-          <div className="absolute h-2 w-2 -translate-x-[160px] rounded-full bg-moss/25 border border-moss/20" />
-          <div className="absolute h-2 w-2 translate-x-[160px] rounded-full bg-moss/25 border border-moss/20" />
+          <div className="absolute h-2 w-2 -translate-y-[160px] rounded-full bg-rust/40 border border-rust/30" />
+          <div className="absolute h-2 w-2 translate-y-[160px] rounded-full bg-graph/40 border border-graph/30" />
+          <div className="absolute h-2 w-2 -translate-x-[160px] rounded-full bg-moss/40 border border-moss/30" />
+          <div className="absolute h-2 w-2 translate-x-[160px] rounded-full bg-moss/40 border border-moss/30" />
           {/* center dot */}
           <div className="absolute h-2.5 w-2.5 rounded-full bg-rust shadow-sm" />
         </div>
 
         {/* secondary faint ring for depth — far background */}
-        <div className="absolute left-1/2 top-[52%] hidden h-[780px] w-[780px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-line/20 md:block" />
+        <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 block h-[780px] w-[780px] rounded-full border border-ink/10 scale-[0.45] sm:scale-[0.6] md:top-[52%] md:scale-100" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-28">
@@ -692,9 +726,67 @@ function HeroSection() {
           <Link href="/projects" className="button-primary">
             Explore projects
           </Link>
-          <a href="/resume.pdf" download className="button-secondary">
-            Download Resume
-          </a>
+          <div className="relative" ref={resumeWrapRef}>
+            <button
+              type="button"
+              onClick={() => setResumeOpen((v) => !v)}
+              className="button-secondary inline-flex items-center gap-2"
+              aria-haspopup="menu"
+              aria-expanded={resumeOpen}
+            >
+              Resume
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+                className={`transition-transform duration-200 ${resumeOpen ? "rotate-180" : ""}`}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {resumeOpen && (
+              <div
+                ref={resumeMenuRef}
+                role="menu"
+                aria-label="Resume actions"
+                className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-xl border border-line bg-paper p-1.5 shadow-soft md:absolute md:inset-x-auto md:bottom-auto md:left-0 md:top-full md:mt-2 md:w-60 md:p-0 md:rounded-lg"
+              >
+                <a
+                  href="/resume.pdf"
+                  target="_blank"
+                  rel="noreferrer"
+                  role="menuitem"
+                  onClick={() => setResumeOpen(false)}
+                  className="flex items-center justify-between gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-panel md:rounded-none md:py-3"
+                >
+                  Open resume
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M15 3h6v6" />
+                    <path d="M10 14 21 3" />
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  </svg>
+                </a>
+                <a
+                  href="/resume.pdf"
+                  download
+                  role="menuitem"
+                  onClick={() => setResumeOpen(false)}
+                  className="flex items-center justify-between gap-3 rounded-lg border-t border-line px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-panel md:rounded-none md:py-3"
+                >
+                  Download
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <path d="m7 10 5 5 5-5" />
+                    <path d="M12 15V3" />
+                  </svg>
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>
@@ -712,14 +804,6 @@ function HomePage() {
   const featured = projects.filter((project) => project.featured);
   const others = projects.filter((project) => !project.featured);
 
-  const selectedWorkIds = [
-    "airlines-status-event-flow",
-    "yukti-ido-v11",
-    "airlines-realtime-layer",
-    "yukti-compaction"
-  ];
-  const selectedWorks = technicalWorks.filter((work) => selectedWorkIds.includes(work.id));
-
   return (
     <>
       <HeroSection />
@@ -728,7 +812,8 @@ function HomePage() {
 
       <AchievementsSection />
 
-      <Section eyebrow="03 / Projects" title="Featured projects" accent="graph">
+      <div data-reveal>
+        <Section eyebrow="03 / Projects" title="Featured projects" accent="rust">
         {featured.length > 0 && (
           <div className={`grid gap-4 ${featured.length > 1 ? "lg:grid-cols-2" : ""}`}>
             {featured.map((project) => (
@@ -743,25 +828,10 @@ function HomePage() {
             ))}
           </div>
         )}
-      </Section>
+        </Section>
+      </div>
 
       <AnalyticsPreviewSection />
-
-      <Section eyebrow="05 / Selected work" title="Selected work" accent="steel">
-        <WorkCards items={selectedWorks} initial={2} emptyText="No technical work has been published yet." />
-      </Section>
-
-      <Section eyebrow="06 / Notes" title="Notes" accent="moss">
-        <NoteList
-          notesToShow={[...notes]
-            .sort(
-              (a, b) =>
-                ({ published: 0, draft: 1, planned: 2 }[a.status] -
-                  { published: 0, draft: 1, planned: 2 }[b.status])
-            )
-            .slice(0, 4)}
-        />
-      </Section>
 
       <ContactBand />
     </>
@@ -1417,12 +1487,12 @@ function AboutPage() {
 function AnalyticsPreviewSection() {
   if (!analyticsConfig.github.enabled && !analyticsConfig.leetcode.enabled) return null;
   return (
-    <section id="pulse" className="section scroll-mt-24 relative overflow-hidden">
+    <section id="pulse" className="section scroll-mt-24 relative overflow-hidden" data-reveal>
       <div className="pointer-events-none absolute inset-0 -z-10 opacity-[0.035] bg-gradient-to-br from-graph via-graph/40 to-transparent" aria-hidden="true" />
       <div className="section-heading">
         <div className="mb-3 flex items-center gap-4">
           <span className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.16em] text-rust">
-            <span className="h-1.5 w-1.5 rounded-full bg-graph" aria-hidden="true" />
+            <span className="h-1.5 w-1.5 rounded-full bg-rust" aria-hidden="true" />
             04 / Pulse
           </span>
           <span className="section-rule" aria-hidden="true" />
@@ -1444,8 +1514,8 @@ function AnalyticsPreviewSection() {
             <span className="h-2.5 w-2.5 rounded-full bg-moss/80" aria-hidden="true" />
           </div>
           <span className="font-mono text-[11px] tracking-wide text-muted">adityacoderr@pulse — live</span>
-          <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[11px] text-moss">
-            <span className="h-1.5 w-1.5 rounded-full bg-moss animate-pulse" aria-hidden="true" /> live
+          <span className="hidden sm:inline-flex items-center gap-1.5 font-mono text-[11px] text-rust">
+            <span className="h-1.5 w-1.5 rounded-full bg-rust animate-pulse" aria-hidden="true" /> live
           </span>
         </div>
 
@@ -1464,7 +1534,7 @@ function AnalyticsPreviewSection() {
 
 function ContactBand() {
   return (
-    <section className="bg-panel">
+    <section className="bg-panel" data-reveal>
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-5 py-14 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="eyebrow !mb-2">Contact</p>
@@ -1527,6 +1597,11 @@ function NotFoundPage() {
 
 export default function App() {
   const path = usePathname();
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    initSmoothScroll();
+  }, []);
 
   const page = useMemo(() => {
     if (path === "/") return <HomePage />;
@@ -1563,5 +1638,58 @@ export default function App() {
     return <NotFoundPage />;
   }, [path]);
 
-  return <Layout path={path}>{page}</Layout>;
+  useEffect(() => {
+    const root = pageRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const ctx = gsap.context(() => {
+      const reveals = Array.from(root.querySelectorAll<HTMLElement>("[data-reveal]"));
+
+      reveals.forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0, y: 48 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1.3,
+            ease: "power3.out",
+            scrollTrigger: { trigger: el, start: "top 88%", once: true }
+          }
+        );
+      });
+
+      if (path === "/") {
+        const hero = root.querySelector(".hero");
+        if (hero) {
+          const heroContent = hero.querySelector(".max-w-7xl");
+          if (heroContent) {
+            gsap.fromTo(
+              heroContent.children,
+              { opacity: 0, y: 40 },
+              { opacity: 1, y: 0, duration: 1.15, stagger: 0.14, ease: "power3.out", delay: 0.2 }
+            );
+          }
+          const heroBg = hero.querySelector(".hero-bg");
+          if (heroBg) {
+            gsap.to(heroBg, {
+              yPercent: 14,
+              ease: "none",
+              scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true }
+            });
+          }
+        }
+      }
+    }, root);
+
+    ScrollTrigger.refresh();
+    return () => ctx.revert();
+  }, [path]);
+
+  return (
+    <Layout path={path}>
+      <div ref={pageRef}>{page}</div>
+    </Layout>
+  );
 }
