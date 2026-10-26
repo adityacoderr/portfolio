@@ -15,6 +15,8 @@ export const analyticsConfig = {
   leetcode: {
     username: "adityacoderrr",
     enabled: true,
+    // Pause live updates — component still shows existing data but won't fetch new polls
+    paused: true,
     // Primary API (alfa) + fallback rendered via leetcard image
     // Profile: https://leetcode.com/u/adityacoderrr/
     apiBase: "https://alfa-leetcode-api.onrender.com",

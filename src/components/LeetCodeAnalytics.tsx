@@ -40,6 +40,7 @@ function useLeetCode() {
   const [tick, setTick] = useState(0);
   const username = analyticsConfig.leetcode.username;
   const apiBase = analyticsConfig.leetcode.apiBase;
+  const paused = analyticsConfig.leetcode.paused;
 
   useEffect(() => {
     let cancelled = false;
@@ -57,16 +58,23 @@ function useLeetCode() {
       }
     }
     fetchData(false);
-    const id = window.setInterval(() => {
-      fetchData(true);
-      setTick((t) => t + 1);
-    }, 30000);
-    // re-render every 30s for timeAgo freshness even without fetch
+    // Only poll if not paused
+    if (!paused) {
+      const id = window.setInterval(() => {
+        fetchData(true);
+        setTick((t) => t + 1);
+      }, 30000);
+      // re-render every 30s for timeAgo freshness even without fetch
+      return () => {
+        cancelled = true;
+        window.clearInterval(id);
+      };
+    }
+    // When paused, still allow timeAgo refresh via tick on re-render
     return () => {
       cancelled = true;
-      window.clearInterval(id);
     };
-  }, [username, apiBase]);
+  }, [username, apiBase, paused]);
 
   void tick; // keep tick alive for timeAgo refresh
   return { data, loading };
